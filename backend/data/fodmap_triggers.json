@@ -1,0 +1,128 @@
+{
+  "protocol_id": "low_fodmap",
+  "protocol_name": "Low-FODMAP",
+  "description": "Fermentable Oligosaccharides, Disaccharides, Monosaccharides, and Polyols",
+  "high_fodmap_categories": {
+    "oligosaccharides_fructans": {
+      "description": "Fructans - found in wheat, onion, garlic",
+      "triggers": [
+        "wheat",
+        "rye",
+        "barley",
+        "onion",
+        "garlic",
+        "shallots",
+        "leeks",
+        "artichokes",
+        "asparagus",
+        "beetroot",
+        "brussels sprouts",
+        "cabbage",
+        "fennel",
+        "chicory",
+        "inulin",
+        "fructooligosaccharides",
+        "bread",
+        "pasta",
+        "couscous",
+        "crackers",
+        "biscuits"
+      ]
+    },
+    "oligosaccharides_gos": {
+      "description": "Galacto-oligosaccharides - found in legumes",
+      "triggers": [
+        "chickpeas",
+        "lentils",
+        "kidney beans",
+        "black beans",
+        "baked beans",
+        "soybeans",
+        "hummus",
+        "falafel"
+      ]
+    },
+    "disaccharides_lactose": {
+      "description": "Lactose - found in dairy products",
+      "triggers": [
+        "milk",
+        "cream",
+        "ice cream",
+        "soft cheese",
+        "cottage cheese",
+        "ricotta",
+        "cream cheese",
+        "custard",
+        "yogurt",
+        "sour cream",
+        "buttermilk",
+        "condensed milk",
+        "evaporated milk"
+      ]
+    },
+    "monosaccharides_fructose": {
+      "description": "Excess fructose - found in certain fruits and sweeteners",
+      "triggers": [
+        "apples",
+        "pears",
+        "mangoes",
+        "watermelon",
+        "cherries",
+        "figs",
+        "honey",
+        "high fructose corn syrup",
+        "agave",
+        "fruit juice concentrate",
+        "dried fruit"
+      ]
+    },
+    "polyols": {
+      "description": "Sugar alcohols - found in stone fruits and artificial sweeteners",
+      "triggers": [
+        "apricots",
+        "avocado",
+        "blackberries",
+        "cauliflower",
+        "mushrooms",
+        "peaches",
+        "plums",
+        "prunes",
+        "snow peas",
+        "sorbitol",
+        "mannitol",
+        "xylitol",
+        "maltitol",
+        "isomalt"
+      ]
+    }
+  },
+  "common_restaurant_triggers": [
+    "garlic",
+    "onion",
+    "wheat flour",
+    "cream sauce",
+    "milk-based sauce",
+    "honey glaze",
+    "apple cider",
+    "mushroom",
+    "beans",
+    "bread crumbs",
+    "breaded",
+    "battered"
+  ],
+  "safe_alternatives": [
+    "rice",
+    "potatoes",
+    "quinoa",
+    "gluten-free options",
+    "lactose-free dairy",
+    "hard cheeses (parmesan, cheddar)",
+    "olive oil",
+    "garlic-infused oil (no garlic pieces)",
+    "green onion tops (green part only)",
+    "most meats and fish (plain)",
+    "eggs",
+    "tofu (firm)",
+    "most vegetables (carrots, zucchini, tomatoes, spinach)"
+  ]
+}

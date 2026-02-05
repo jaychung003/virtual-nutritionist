@@ -1,0 +1,144 @@
+{
+  "protocol_id": "scd",
+  "protocol_name": "Specific Carbohydrate Diet",
+  "description": "Eliminates complex carbohydrates, grains, and most processed foods",
+  "illegal_categories": {
+    "grains_and_starches": {
+      "description": "All grains and starchy foods",
+      "triggers": [
+        "wheat",
+        "rice",
+        "corn",
+        "oats",
+        "barley",
+        "rye",
+        "millet",
+        "buckwheat",
+        "quinoa",
+        "amaranth",
+        "spelt",
+        "bread",
+        "pasta",
+        "cereal",
+        "crackers",
+        "tortillas",
+        "potatoes",
+        "sweet potatoes",
+        "yams",
+        "tapioca",
+        "arrowroot"
+      ]
+    },
+    "sugars_and_sweeteners": {
+      "description": "Complex sugars and most sweeteners",
+      "triggers": [
+        "sugar",
+        "sucrose",
+        "brown sugar",
+        "powdered sugar",
+        "molasses",
+        "maple syrup",
+        "corn syrup",
+        "high fructose corn syrup",
+        "agave",
+        "coconut sugar",
+        "maltose",
+        "isomaltose",
+        "lactose"
+      ]
+    },
+    "dairy_products": {
+      "description": "Most dairy except specific allowed items",
+      "triggers": [
+        "milk",
+        "cream",
+        "half and half",
+        "buttermilk",
+        "sour cream",
+        "ice cream",
+        "processed cheese",
+        "cream cheese",
+        "cottage cheese",
+        "ricotta",
+        "feta",
+        "mozzarella",
+        "commercial yogurt"
+      ]
+    },
+    "processed_foods": {
+      "description": "Processed and packaged foods",
+      "triggers": [
+        "canned vegetables",
+        "canned fruits",
+        "processed meats",
+        "hot dogs",
+        "deli meats",
+        "bacon (most commercial)",
+        "sausages",
+        "bologna",
+        "spam",
+        "imitation crab",
+        "fish sticks"
+      ]
+    },
+    "thickeners_and_additives": {
+      "description": "Food additives and thickeners",
+      "triggers": [
+        "cornstarch",
+        "arrowroot",
+        "tapioca starch",
+        "modified food starch",
+        "carrageenan",
+        "guar gum",
+        "xanthan gum",
+        "pectin",
+        "agar"
+      ]
+    },
+    "legumes": {
+      "description": "Most beans and legumes",
+      "triggers": [
+        "chickpeas",
+        "soybeans",
+        "bean sprouts",
+        "fava beans",
+        "garbanzo beans",
+        "mung beans"
+      ]
+    }
+  },
+  "common_restaurant_triggers": [
+    "bread",
+    "rice",
+    "pasta",
+    "potatoes",
+    "french fries",
+    "breaded items",
+    "gravy",
+    "sauces with flour",
+    "sugar in sauces",
+    "corn tortillas",
+    "flour tortillas",
+    "croutons",
+    "buns",
+    "rolls"
+  ],
+  "safe_alternatives": [
+    "fresh meats (unprocessed)",
+    "fresh fish",
+    "eggs",
+    "homemade SCD yogurt",
+    "aged cheeses (cheddar, swiss, parmesan)",
+    "butter",
+    "most fresh vegetables",
+    "most fresh fruits",
+    "honey (only allowed sweetener)",
+    "nuts (most)",
+    "nut flours",
+    "dry curd cottage cheese",
+    "navy beans",
+    "lentils",
+    "split peas",
+    "lima beans"
+  ]
+}

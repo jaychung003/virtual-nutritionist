@@ -1,0 +1,150 @@
+{
+  "protocol_id": "low_residue",
+  "protocol_name": "Low-Residue Diet",
+  "description": "Limits high-fiber foods to reduce stool volume and bowel movements",
+  "high_residue_categories": {
+    "whole_grains": {
+      "description": "Whole grain and high-fiber grain products",
+      "triggers": [
+        "whole wheat bread",
+        "whole grain bread",
+        "brown rice",
+        "wild rice",
+        "whole wheat pasta",
+        "bran",
+        "bran cereal",
+        "oatmeal",
+        "granola",
+        "muesli",
+        "whole grain crackers",
+        "popcorn",
+        "quinoa",
+        "bulgur",
+        "barley"
+      ]
+    },
+    "raw_vegetables": {
+      "description": "Raw and high-fiber vegetables",
+      "triggers": [
+        "raw vegetables",
+        "salad",
+        "coleslaw",
+        "broccoli",
+        "cauliflower",
+        "cabbage",
+        "brussels sprouts",
+        "corn",
+        "peas",
+        "beans",
+        "lentils",
+        "onions",
+        "spinach",
+        "kale",
+        "swiss chard",
+        "asparagus",
+        "celery",
+        "mushrooms",
+        "peppers",
+        "tomatoes with skin",
+        "potato skins"
+      ]
+    },
+    "fruits": {
+      "description": "High-fiber and raw fruits",
+      "triggers": [
+        "raw fruits with skin",
+        "berries",
+        "dried fruits",
+        "raisins",
+        "prunes",
+        "figs",
+        "dates",
+        "coconut",
+        "pineapple",
+        "oranges",
+        "grapefruits",
+        "apples with skin",
+        "pears with skin"
+      ]
+    },
+    "nuts_and_seeds": {
+      "description": "All nuts, seeds, and related products",
+      "triggers": [
+        "nuts",
+        "almonds",
+        "walnuts",
+        "pecans",
+        "peanuts",
+        "cashews",
+        "pistachios",
+        "seeds",
+        "sunflower seeds",
+        "pumpkin seeds",
+        "sesame seeds",
+        "chia seeds",
+        "flax seeds",
+        "nut butters",
+        "peanut butter",
+        "almond butter",
+        "tahini"
+      ]
+    },
+    "legumes": {
+      "description": "Beans, lentils, and legumes",
+      "triggers": [
+        "black beans",
+        "kidney beans",
+        "pinto beans",
+        "navy beans",
+        "chickpeas",
+        "lentils",
+        "split peas",
+        "hummus",
+        "bean dips",
+        "refried beans",
+        "baked beans",
+        "edamame"
+      ]
+    },
+    "tough_meats": {
+      "description": "Tough or fibrous meats",
+      "triggers": [
+        "tough meats",
+        "gristle",
+        "skin on poultry",
+        "fried meats",
+        "sausages with casings"
+      ]
+    }
+  },
+  "common_restaurant_triggers": [
+    "salad",
+    "coleslaw",
+    "raw vegetables",
+    "whole wheat options",
+    "brown rice",
+    "beans",
+    "nuts on dishes",
+    "seeds as garnish",
+    "fruit with skin",
+    "dried fruit",
+    "granola",
+    "high-fiber sides"
+  ],
+  "safe_alternatives": [
+    "white bread",
+    "white rice",
+    "refined pasta",
+    "well-cooked vegetables (no skin)",
+    "canned fruits (no skin)",
+    "fruit juice (no pulp)",
+    "tender meats",
+    "fish",
+    "poultry (no skin)",
+    "eggs",
+    "smooth nut butters (small amounts)",
+    "dairy products",
+    "clear broths",
+    "mashed potatoes (no skin)"
+  ]
+}
