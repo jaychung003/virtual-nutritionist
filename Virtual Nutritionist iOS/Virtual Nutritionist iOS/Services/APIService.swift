@@ -5,8 +5,8 @@ import UIKit
 class APIService {
     static let shared = APIService()
     
-    // TODO: Update this URL when deploying
-    private let baseURL = "http://10.0.0.110:8000" // "http://localhost:8000" 
+    /// Production backend on Render. Use a different URL for local/simulator if needed.
+    private let baseURL = "https://virtual-nutritionist-1upi.onrender.com" 
     
     private init() {}
     
