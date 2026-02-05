@@ -4,22 +4,29 @@ Analyzes restaurant menu photos to identify trigger ingredients for IBD patients
 """
 
 import os
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 from dotenv import load_dotenv
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 from services.vision_service import analyze_menu_image
 from services.inference_service import load_protocol_triggers
 
 load_dotenv()
 
+limiter = Limiter(key_func=get_remote_address)
+
 app = FastAPI(
     title="IBD Menu Scanner API",
     description="Analyzes restaurant menus for IBD dietary triggers",
     version="1.0.0"
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS middleware for iOS app
 app.add_middleware(
@@ -51,13 +58,15 @@ class AnalyzeMenuResponse(BaseModel):
 
 
 @app.get("/")
-async def root():
+@limiter.limit("60/minute")
+async def root(request: Request):
     """Health check endpoint."""
     return {"status": "healthy", "service": "IBD Menu Scanner API"}
 
 
 @app.get("/protocols")
-async def get_protocols():
+@limiter.limit("60/minute")
+async def get_protocols(request: Request):
     """Get available dietary protocols."""
     return {
         "protocols": [
@@ -81,11 +90,14 @@ async def get_protocols():
 
 
 @app.post("/analyze-menu", response_model=AnalyzeMenuResponse)
-async def analyze_menu(request: AnalyzeMenuRequest):
+@limiter.limit("20/minute")
+async def analyze_menu(req: Request, request: AnalyzeMenuRequest):
     """
     Analyze a menu image and identify trigger ingredients.
+    Rate limited to 20 requests per minute per IP to control API costs.
     
     Args:
+        req: FastAPI request (for rate limit key)
         request: Contains base64 image and list of dietary protocols
         
     Returns:
