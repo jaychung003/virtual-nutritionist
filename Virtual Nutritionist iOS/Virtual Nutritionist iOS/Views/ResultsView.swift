@@ -195,7 +195,13 @@ struct FilterChip: View {
 struct MenuItemCard: View {
     let item: MenuItem
     @State private var isExpanded = false
-    
+    @State private var isBookmarked = false
+    @State private var showingBookmarkAlert = false
+    @State private var bookmarkError: String?
+
+    private let apiService = APIService.shared
+    private let authService = AuthService.shared
+
     var safetyColor: Color {
         switch item.safety {
         case .safe: return .green
@@ -239,7 +245,16 @@ struct MenuItemCard: View {
                     }
                     
                     Spacer()
-                    
+
+                    // Bookmark button
+                    Button(action: {
+                        handleBookmark()
+                    }) {
+                        Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
+                            .foregroundStyle(isBookmarked ? .yellow : .secondary)
+                    }
+                    .buttonStyle(.plain)
+
                     // Expand/collapse chevron
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .font(.caption)
@@ -248,6 +263,18 @@ struct MenuItemCard: View {
                 .padding(16)
             }
             .buttonStyle(.plain)
+            .alert("Sign In Required", isPresented: $showingBookmarkAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Please sign in to bookmark menu items")
+            }
+            .alert("Error", isPresented: .constant(bookmarkError != nil)) {
+                Button("OK") {
+                    bookmarkError = nil
+                }
+            } message: {
+                Text(bookmarkError ?? "")
+            }
             
             // Expanded content
             if isExpanded {
@@ -297,6 +324,34 @@ struct MenuItemCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(safetyColor.opacity(0.3), lineWidth: 1)
         )
+    }
+
+    private func handleBookmark() {
+        // Check if user is authenticated
+        guard authService.isAuthenticated() else {
+            showingBookmarkAlert = true
+            return
+        }
+
+        Task {
+            do {
+                _ = try await apiService.createBookmark(
+                    menuItemName: item.name,
+                    safetyRating: item.safety.rawValue,
+                    triggers: item.triggers,
+                    notes: item.notes,
+                    restaurantName: nil
+                )
+
+                await MainActor.run {
+                    isBookmarked = true
+                }
+            } catch {
+                await MainActor.run {
+                    bookmarkError = error.localizedDescription
+                }
+            }
+        }
     }
 }
 

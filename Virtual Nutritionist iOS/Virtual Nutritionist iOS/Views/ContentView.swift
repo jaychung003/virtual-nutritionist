@@ -2,6 +2,35 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var userProfile: UserProfile
+    @EnvironmentObject var authViewModel: AuthViewModel
+
+    var body: some View {
+        TabView {
+            ScannerHomeView()
+                .tabItem {
+                    Label("Scan", systemImage: "camera.fill")
+                }
+
+            ScanHistoryView()
+                .tabItem {
+                    Label("History", systemImage: "clock.arrow.circlepath")
+                }
+
+            BookmarksView()
+                .tabItem {
+                    Label("Bookmarks", systemImage: "bookmark.fill")
+                }
+
+            SettingsView()
+                .tabItem {
+                    Label("Settings", systemImage: "gearshape.fill")
+                }
+        }
+    }
+}
+
+struct ScannerHomeView: View {
+    @EnvironmentObject var userProfile: UserProfile
     @State private var showingCamera = false
     @State private var showingResults = false
     @State private var showingProfile = false
@@ -9,7 +38,7 @@ struct ContentView: View {
     @State private var analysisResults: [MenuItem] = []
     @State private var isAnalyzing = false
     @State private var errorMessage: String?
-    
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 24) {
@@ -256,7 +285,84 @@ struct FlowLayout: Layout {
     }
 }
 
+struct SettingsView: View {
+    @EnvironmentObject var userProfile: UserProfile
+    @EnvironmentObject var authViewModel: AuthViewModel
+    @State private var showingProfile = false
+
+    var body: some View {
+        NavigationView {
+            List {
+                // User section
+                if let user = authViewModel.currentUser {
+                    Section {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(user.email)
+                                .font(.headline)
+                            Text("Member since \(formatDate(user.createdAt))")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+
+                // Dietary protocols
+                Section(header: Text("Dietary Protocols")) {
+                    Button(action: {
+                        showingProfile = true
+                    }) {
+                        HStack {
+                            Text("Manage Protocols")
+                            Spacer()
+                            Text("\(userProfile.selectedProtocols.count) selected")
+                                .foregroundColor(.secondary)
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .foregroundColor(.primary)
+                }
+
+                // Account actions
+                Section {
+                    Button(role: .destructive, action: {
+                        Task {
+                            await authViewModel.logout()
+                        }
+                    }) {
+                        if authViewModel.isLoading {
+                            HStack {
+                                ProgressView()
+                                Text("Logging out...")
+                            }
+                        } else {
+                            Text("Log Out")
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Settings")
+            .sheet(isPresented: $showingProfile) {
+                ProfileView()
+            }
+        }
+    }
+
+    private func formatDate(_ isoString: String) -> String {
+        let formatter = ISO8601DateFormatter()
+        guard let date = formatter.date(from: isoString) else {
+            return isoString
+        }
+
+        let displayFormatter = DateFormatter()
+        displayFormatter.dateStyle = .medium
+        return displayFormatter.string(from: date)
+    }
+}
+
 #Preview {
     ContentView()
         .environmentObject(UserProfile())
+        .environmentObject(AuthViewModel())
 }
