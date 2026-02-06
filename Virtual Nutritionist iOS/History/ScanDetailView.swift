@@ -55,8 +55,8 @@ struct ScanDetailView: View {
                                 .foregroundColor(.secondary)
 
                             HStack {
-                                ForEach(scan.protocolsUsed, id: \.self) { dietaryProtocol in
-                                    Text(protocolDisplayName(dietaryProtocol))
+                                ForEach(scan.protocolsUsed, id: \.self) { protocol in
+                                    Text(protocolDisplayName(protocol))
                                         .font(.caption)
                                         .foregroundColor(.blue)
                                         .padding(.horizontal, 8)
@@ -148,10 +148,10 @@ struct MenuItemRow: View {
 }
 
 struct SafetyBadge: View {
-    let safety: SafetyRating
+    let safety: String
 
     var body: some View {
-        Text(safety.displayName)
+        Text(safety.capitalized)
             .font(.caption)
             .fontWeight(.semibold)
             .foregroundColor(.white)
@@ -162,13 +162,15 @@ struct SafetyBadge: View {
     }
 
     private var backgroundColor: Color {
-        switch safety {
-        case .safe:
+        switch safety.lowercased() {
+        case "safe":
             return .green
-        case .caution:
+        case "caution":
             return .orange
-        case .avoid:
+        case "avoid":
             return .red
+        default:
+            return .gray
         }
     }
 }

@@ -6,7 +6,7 @@ class APIService {
     static let shared = APIService()
 
     /// Production backend on Render. Use a different URL for local/simulator if needed.
-    private let baseURL = "https://virtual-nutritionist.onrender.com"
+    private let baseURL = "https://virtual-nutritionist-1upi.onrender.com"
     private let keychain = KeychainService.shared
     private let authService = AuthService.shared
 

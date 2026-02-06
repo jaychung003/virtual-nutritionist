@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftUI
-import Combine
 
 @MainActor
 class AuthViewModel: ObservableObject {

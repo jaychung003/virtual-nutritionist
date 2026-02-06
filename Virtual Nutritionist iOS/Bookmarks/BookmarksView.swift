@@ -162,7 +162,7 @@ struct BookmarkRow: View {
 
                 Spacer()
 
-                SafetyBadge(safety: SafetyRating(rawValue: bookmark.safetyRating) ?? .caution)
+                SafetyBadge(safety: bookmark.safetyRating)
             }
 
             if let restaurantName = bookmark.restaurantName {

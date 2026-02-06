@@ -136,8 +136,8 @@ struct ScanHistoryRow: View {
             }
 
             HStack {
-                ForEach(scan.protocolsUsed, id: \.self) { dietaryProtocol in
-                    Text(protocolDisplayName(dietaryProtocol))
+                ForEach(scan.protocolsUsed, id: \.self) { protocol in
+                    Text(protocolDisplayName(protocol))
                         .font(.caption2)
                         .foregroundColor(.blue)
                         .padding(.horizontal, 6)

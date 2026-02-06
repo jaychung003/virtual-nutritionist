@@ -33,7 +33,7 @@ enum AuthError: LocalizedError {
 class AuthService {
     static let shared = AuthService()
 
-    private let baseURL = "https://virtual-nutritionist.onrender.com"
+    private let baseURL = "https://virtual-nutritionist-1upi.onrender.com"
     private let keychain = KeychainService.shared
 
     private init() {}
@@ -135,6 +135,7 @@ class AuthService {
 
         var request = URLRequest(url: requestURL)
         request.httpMethod = method
+        request.timeoutInterval = 120 // Allow extra time for cold starts on Render
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         // Add authorization header if required

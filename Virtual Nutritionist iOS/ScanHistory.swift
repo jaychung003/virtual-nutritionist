@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ScanItem: Codable, Identifiable, Hashable {
+struct ScanItem: Codable, Identifiable {
     let id: String
     let protocolsUsed: [String]
     let restaurantName: String?
