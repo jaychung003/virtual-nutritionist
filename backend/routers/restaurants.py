@@ -15,7 +15,6 @@ from services.google_places_service import (
     calculate_distance,
     get_cuisine_type
 )
-from services.menu_photo_service import MenuPhotoService
 from services.vision_service import analyze_menu_image
 from services.inference_service import load_protocol_triggers
 
@@ -275,29 +274,108 @@ async def get_restaurant_photo(
     }
 
 
-@router.post("/{place_id}/analyze")
-async def analyze_restaurant_menu(
+class AnalyzeMenuRequest(BaseModel):
+    image: str  # base64 encoded image
+    protocols: List[str]
+
+
+@router.get("/{place_id}/menu")
+async def get_restaurant_menu(
     place_id: str,
-    protocols: List[str] = Query(..., description="Dietary protocols to check"),
-    debug: bool = Query(default=False, description="Return detailed debug info"),
+    protocols: List[str] = Query(default=[], description="Filter by dietary protocols"),
     db: Session = Depends(get_db)
 ):
     """
-    Analyze restaurant menu from Google Places photos.
+    Get cached menu analysis for a restaurant.
 
-    This endpoint:
-    1. Downloads photos from Google Places
-    2. Identifies which photos are menus using AI
-    3. Analyzes menu items for dietary triggers
-    4. Saves results to database
-    5. Returns analysis
+    Returns the most recent community-contributed menu analysis.
+    This allows users to see what menu items are safe BEFORE visiting the restaurant.
 
     - **place_id**: Google Place ID
+    - **protocols**: Optional filter by protocols (returns all items if empty)
+
+    Returns cached menu analysis or 404 if no analysis exists.
+    """
+    from datetime import datetime as dt
+
+    # Check if we have menu data for this restaurant
+    restaurant = db.query(Restaurant).filter(
+        Restaurant.google_place_id == place_id
+    ).first()
+
+    if not restaurant or not restaurant.menu_last_scanned:
+        raise HTTPException(
+            status_code=404,
+            detail="No menu analysis available for this restaurant. Be the first to scan!"
+        )
+
+    # Get active menu items
+    menu_items = db.query(RestaurantMenuItem).filter(
+        RestaurantMenuItem.restaurant_id == restaurant.id,
+        RestaurantMenuItem.is_active == True
+    ).all()
+
+    # Calculate freshness
+    days_since_scan = (dt.utcnow() - restaurant.menu_last_scanned.replace(tzinfo=None)).days
+
+    if days_since_scan < 7:
+        freshness = "fresh"
+    elif days_since_scan < 30:
+        freshness = "recent"
+    else:
+        freshness = "stale"
+
+    return {
+        "restaurant": {
+            "place_id": place_id,
+            "name": restaurant.name,
+            "address": restaurant.address,
+            "cuisine_type": restaurant.cuisine_type
+        },
+        "menu_items": [
+            {
+                "name": item.name,
+                "description": item.description,
+                "price": item.price,
+                "category": item.category
+            }
+            for item in menu_items
+        ],
+        "metadata": {
+            "last_analyzed": restaurant.menu_last_scanned,
+            "days_since_scan": days_since_scan,
+            "freshness": freshness,
+            "total_scans": int(restaurant.total_scans or "1"),
+            "item_count": len(menu_items)
+        },
+        "message": f"Menu analyzed {days_since_scan} days ago by the community. {'Fresh data!' if freshness == 'fresh' else 'Consider re-scanning if menu has changed.' if freshness == 'stale' else 'Fairly recent data.'}"
+    }
+
+
+@router.post("/{place_id}/analyze")
+async def analyze_restaurant_menu(
+    place_id: str,
+    request: AnalyzeMenuRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Analyze restaurant menu from user-uploaded photo.
+
+    This is a community-contributed endpoint where users upload menu photos
+    they took at restaurants. The analysis is saved to help future users.
+
+    This endpoint:
+    1. Accepts a user-uploaded menu photo
+    2. Analyzes menu items for dietary triggers
+    3. Saves results to database (shared with all users)
+    4. Returns analysis
+
+    - **place_id**: Google Place ID
+    - **image**: Base64 encoded menu photo
     - **protocols**: List of dietary protocols (e.g., ["gluten_free", "vegan"])
 
     Returns menu analysis with safe/caution/avoid ratings.
     """
-    import base64
     from datetime import datetime as dt
     import uuid
 
@@ -309,95 +387,36 @@ async def analyze_restaurant_menu(
         "paleo", "keto", "low_histamine"
     }
 
-    for protocol in protocols:
+    for protocol in request.protocols:
         if protocol not in valid_protocols:
             raise HTTPException(
                 status_code=400,
                 detail=f"Invalid protocol: {protocol}. Valid options: {sorted(valid_protocols)}"
             )
 
-    # Check if recently analyzed (< 7 days ago)
-    existing = db.query(Restaurant).filter(
-        Restaurant.google_place_id == place_id
-    ).first()
-
-    if existing and existing.menu_last_scanned:
-        days_since = (dt.utcnow() - existing.menu_last_scanned.replace(tzinfo=None)).days
-        if days_since < 7:
-            # Return cached results
-            menu_items = db.query(RestaurantMenuItem).filter(
-                RestaurantMenuItem.restaurant_id == existing.id,
-                RestaurantMenuItem.is_active == True
-            ).all()
-
-            return {
-                "restaurant": {
-                    "place_id": place_id,
-                    "name": existing.name,
-                    "address": existing.address
-                },
-                "menu_items": [
-                    {
-                        "name": item.name,
-                        "description": item.description,
-                        "price": item.price,
-                        "category": item.category
-                    }
-                    for item in menu_items
-                ],
-                "cached": True,
-                "last_analyzed": existing.menu_last_scanned,
-                "message": "Returning cached analysis from database"
-            }
-
-    # Get restaurant details from Google
+    # Get restaurant details from Google (for name, address, etc.)
     details = GooglePlacesService.get_place_details(place_id)
     if not details:
         raise HTTPException(status_code=404, detail="Restaurant not found on Google Places")
 
-    # Download and filter menu photos
-    menu_photos, debug_info = await MenuPhotoService.download_and_filter_menu_photos(
-        place_id,
-        max_photos=10,
-        min_confidence=0.7,
-        return_debug_info=debug
-    )
-
-    if not menu_photos:
-        # If debug mode, return detailed debug info instead of error
-        if debug:
-            return {
-                "place_id": place_id,
-                "restaurant_name": details["name"],
-                "debug": True,
-                "menu_photos_found": 0,
-                "error": "No menu photos found",
-                **debug_info
-            }
-
+    # Validate image is provided
+    if not request.image:
         raise HTTPException(
-            status_code=404,
-            detail="No menu photos found. Restaurant may not have menu photos uploaded to Google Maps."
+            status_code=400,
+            detail="Menu image is required"
         )
 
     # Load protocol triggers
-    triggers = load_protocol_triggers(protocols)
+    triggers = load_protocol_triggers(request.protocols)
 
-    # Analyze each menu photo
-    all_menu_items = []
+    # Analyze the user-provided menu photo
+    menu_items = await analyze_menu_image(request.image, request.protocols, triggers)
 
-    for i, (photo_bytes, detection) in enumerate(menu_photos, 1):
-        # Convert to base64
-        image_base64 = base64.b64encode(photo_bytes).decode('utf-8')
+    # Save to database (community-contributed)
+    existing = db.query(Restaurant).filter(
+        Restaurant.google_place_id == place_id
+    ).first()
 
-        # Analyze with existing vision service
-        items = await analyze_menu_image(image_base64, protocols, triggers)
-        all_menu_items.extend(items)
-
-    # Deduplicate items
-    unique_items = MenuPhotoService.deduplicate_menu_items(all_menu_items)
-
-    # Save to database
     if not existing:
         # Create new restaurant
         restaurant = Restaurant(
@@ -416,12 +435,14 @@ async def analyze_restaurant_menu(
         )
         db.add(restaurant)
     else:
-        # Update existing
+        # Update existing - new contribution
         restaurant = existing
+        restaurant.name = details["name"]  # Update in case name changed
+        restaurant.address = details.get("address")
         restaurant.menu_last_scanned = dt.utcnow()
         restaurant.total_scans = str(int(restaurant.total_scans or "0") + 1)
 
-        # Deactivate old menu items
+        # Deactivate old menu items (replace with new scan)
         db.query(RestaurantMenuItem).filter(
             RestaurantMenuItem.restaurant_id == restaurant.id
         ).update({"is_active": False})
@@ -429,36 +450,29 @@ async def analyze_restaurant_menu(
     db.commit()
     db.refresh(restaurant)
 
-    # Save menu items
-    for item in unique_items:
+    # Save menu items from this scan
+    for item in menu_items:
         menu_item = RestaurantMenuItem(
             id=uuid.uuid4(),
             restaurant_id=restaurant.id,
             name=item["name"],
             description=item.get("notes", ""),
-            price=None,  # Could extract from menu
-            category=None,  # Could categorize
+            price=None,  # Could extract from menu in future
+            category=None,  # Could categorize in future
             is_active=True
         )
         db.add(menu_item)
 
     db.commit()
 
-    response = {
+    return {
         "restaurant": {
             "place_id": place_id,
             "name": details["name"],
             "address": details.get("address")
         },
-        "menu_items": unique_items,
-        "photos_analyzed": len(menu_photos),
-        "total_items": len(unique_items),
-        "cached": False,
-        "analyzed_at": dt.utcnow().isoformat()
+        "menu_items": menu_items,
+        "total_items": len(menu_items),
+        "analyzed_at": dt.utcnow().isoformat(),
+        "message": "Analysis saved! Other users can now see this restaurant has menu data."
     }
-
-    # Add debug info if requested
-    if debug and debug_info:
-        response["debug"] = debug_info
-
-    return response
