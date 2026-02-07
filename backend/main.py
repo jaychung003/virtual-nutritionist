@@ -19,7 +19,7 @@ from services.inference_service import load_protocol_triggers
 from db.session import get_db
 from db.models import User, ScanHistory
 from auth.dependencies import get_optional_user
-from routers import auth, profile, scans, bookmarks
+from routers import auth, profile, scans, bookmarks, restaurants
 
 load_dotenv()
 
@@ -47,6 +47,7 @@ app.include_router(auth.router)
 app.include_router(profile.router)
 app.include_router(scans.router)
 app.include_router(bookmarks.router)
+app.include_router(restaurants.router)
 
 
 class AnalyzeMenuRequest(BaseModel):
