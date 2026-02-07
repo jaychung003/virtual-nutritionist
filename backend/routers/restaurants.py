@@ -15,6 +15,9 @@ from services.google_places_service import (
     calculate_distance,
     get_cuisine_type
 )
+from services.menu_photo_service import MenuPhotoService
+from services.vision_service import analyze_menu_image
+from services.inference_service import load_protocol_triggers
 
 router = APIRouter(prefix="/restaurants", tags=["Restaurants"])
 
@@ -269,4 +272,174 @@ async def get_restaurant_photo(
     return {
         "photo_url": url,
         "max_width": max_width
+    }
+
+
+@router.post("/{place_id}/analyze")
+async def analyze_restaurant_menu(
+    place_id: str,
+    protocols: List[str] = Query(..., description="Dietary protocols to check"),
+    db: Session = Depends(get_db)
+):
+    """
+    Analyze restaurant menu from Google Places photos.
+
+    This endpoint:
+    1. Downloads photos from Google Places
+    2. Identifies which photos are menus using AI
+    3. Analyzes menu items for dietary triggers
+    4. Saves results to database
+    5. Returns analysis
+
+    - **place_id**: Google Place ID
+    - **protocols**: List of dietary protocols (e.g., ["gluten_free", "vegan"])
+
+    Returns menu analysis with safe/caution/avoid ratings.
+    """
+    import base64
+    from datetime import datetime as dt
+    import uuid
+
+    # Validate protocols
+    valid_protocols = {
+        "low_fodmap", "scd", "low_residue", "gluten_free", "dairy_free",
+        "nut_free", "peanut_free", "soy_free", "egg_free", "shellfish_free",
+        "fish_free", "pork_free", "red_meat_free", "vegan", "vegetarian",
+        "paleo", "keto", "low_histamine"
+    }
+
+    for protocol in protocols:
+        if protocol not in valid_protocols:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid protocol: {protocol}. Valid options: {sorted(valid_protocols)}"
+            )
+
+    # Check if recently analyzed (< 7 days ago)
+    existing = db.query(Restaurant).filter(
+        Restaurant.google_place_id == place_id
+    ).first()
+
+    if existing and existing.menu_last_scanned:
+        days_since = (dt.utcnow() - existing.menu_last_scanned.replace(tzinfo=None)).days
+        if days_since < 7:
+            # Return cached results
+            menu_items = db.query(RestaurantMenuItem).filter(
+                RestaurantMenuItem.restaurant_id == existing.id,
+                RestaurantMenuItem.is_active == True
+            ).all()
+
+            return {
+                "restaurant": {
+                    "place_id": place_id,
+                    "name": existing.name,
+                    "address": existing.address
+                },
+                "menu_items": [
+                    {
+                        "name": item.name,
+                        "description": item.description,
+                        "price": item.price,
+                        "category": item.category
+                    }
+                    for item in menu_items
+                ],
+                "cached": True,
+                "last_analyzed": existing.menu_last_scanned,
+                "message": "Returning cached analysis from database"
+            }
+
+    # Get restaurant details from Google
+    details = GooglePlacesService.get_place_details(place_id)
+    if not details:
+        raise HTTPException(status_code=404, detail="Restaurant not found on Google Places")
+
+    # Download and filter menu photos
+    menu_photos = await MenuPhotoService.download_and_filter_menu_photos(
+        place_id,
+        max_photos=10,
+        min_confidence=0.7
+    )
+
+    if not menu_photos:
+        raise HTTPException(
+            status_code=404,
+            detail="No menu photos found. Restaurant may not have menu photos uploaded to Google Maps."
+        )
+
+    # Load protocol triggers
+    triggers = load_protocol_triggers(protocols)
+
+    # Analyze each menu photo
+    all_menu_items = []
+
+    for i, (photo_bytes, detection) in enumerate(menu_photos, 1):
+        # Convert to base64
+        image_base64 = base64.b64encode(photo_bytes).decode('utf-8')
+
+        # Analyze with existing vision service
+        items = await analyze_menu_image(image_base64, protocols, triggers)
+        all_menu_items.extend(items)
+
+    # Deduplicate items
+    unique_items = MenuPhotoService.deduplicate_menu_items(all_menu_items)
+
+    # Save to database
+    if not existing:
+        # Create new restaurant
+        restaurant = Restaurant(
+            id=uuid.uuid4(),
+            google_place_id=place_id,
+            name=details["name"],
+            address=details.get("address"),
+            latitude=str(details.get("latitude", "")),
+            longitude=str(details.get("longitude", "")),
+            cuisine_type=get_cuisine_type(details.get("types", [])),
+            price_level="$" * details.get("price_level", 0) if details.get("price_level") else None,
+            phone=details.get("phone"),
+            website=details.get("website"),
+            menu_last_scanned=dt.utcnow(),
+            total_scans="1"
+        )
+        db.add(restaurant)
+    else:
+        # Update existing
+        restaurant = existing
+        restaurant.menu_last_scanned = dt.utcnow()
+        restaurant.total_scans = str(int(restaurant.total_scans or "0") + 1)
+
+        # Deactivate old menu items
+        db.query(RestaurantMenuItem).filter(
+            RestaurantMenuItem.restaurant_id == restaurant.id
+        ).update({"is_active": False})
+
+    db.commit()
+    db.refresh(restaurant)
+
+    # Save menu items
+    for item in unique_items:
+        menu_item = RestaurantMenuItem(
+            id=uuid.uuid4(),
+            restaurant_id=restaurant.id,
+            name=item["name"],
+            description=item.get("notes", ""),
+            price=None,  # Could extract from menu
+            category=None,  # Could categorize
+            is_active=True
+        )
+        db.add(menu_item)
+
+    db.commit()
+
+    return {
+        "restaurant": {
+            "place_id": place_id,
+            "name": details["name"],
+            "address": details.get("address")
+        },
+        "menu_items": unique_items,
+        "photos_analyzed": len(menu_photos),
+        "total_items": len(unique_items),
+        "cached": False,
+        "analyzed_at": dt.utcnow().isoformat()
     }
