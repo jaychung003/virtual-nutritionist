@@ -1,0 +1,131 @@
+{
+  "protocol_id": "shellfish_free",
+  "protocol_name": "Shellfish-Free",
+  "description": "Avoids all shellfish - CRITICAL for life-threatening shellfish allergy and anaphylaxis prevention",
+  "trigger_categories": {
+    "crustaceans": {
+      "description": "Crustacean shellfish",
+      "triggers": [
+        "shrimp",
+        "prawns",
+        "crab",
+        "king crab",
+        "snow crab",
+        "dungeness crab",
+        "blue crab",
+        "lobster",
+        "crayfish",
+        "crawfish",
+        "crawdads",
+        "langoustine",
+        "krill"
+      ]
+    },
+    "mollusks": {
+      "description": "Mollusk shellfish",
+      "triggers": [
+        "clams",
+        "mussels",
+        "oysters",
+        "scallops",
+        "squid",
+        "calamari",
+        "octopus",
+        "cuttlefish",
+        "snails",
+        "escargot",
+        "abalone",
+        "cockles",
+        "periwinkles",
+        "whelks"
+      ]
+    },
+    "shellfish_products": {
+      "description": "Products derived from shellfish",
+      "triggers": [
+        "imitation crab",
+        "surimi",
+        "crab stick",
+        "seafood stick",
+        "shrimp paste",
+        "shrimp sauce",
+        "oyster sauce",
+        "fish sauce",
+        "seafood stock",
+        "seafood broth",
+        "clam juice",
+        "crab bisque",
+        "lobster bisque",
+        "bouillabaisse",
+        "cioppino",
+        "paella",
+        "jambalaya",
+        "gumbo",
+        "étouffée"
+      ]
+    },
+    "hidden_shellfish": {
+      "description": "Less obvious sources of shellfish",
+      "triggers": [
+        "worcestershire sauce",
+        "caesar dressing",
+        "asian cuisine",
+        "seafood seasoning",
+        "crab boil seasoning",
+        "glucosamine",
+        "chitosan",
+        "some pizza toppings",
+        "seafood salad",
+        "seafood pasta",
+        "fried rice",
+        "pad thai",
+        "tom yum",
+        "laksa",
+        "cuttlefish ink",
+        "squid ink pasta",
+        "black pasta"
+      ]
+    }
+  },
+  "common_restaurant_triggers": [
+    "shrimp",
+    "crab",
+    "lobster",
+    "scallops",
+    "calamari",
+    "mussels",
+    "clams",
+    "oysters",
+    "seafood pasta",
+    "paella",
+    "cioppino",
+    "bouillabaisse",
+    "jambalaya",
+    "gumbo",
+    "crab cakes",
+    "shrimp cocktail",
+    "lobster roll",
+    "clam chowder",
+    "oyster sauce",
+    "worcestershire sauce",
+    "caesar dressing",
+    "imitation crab"
+  ],
+  "safe_alternatives": [
+    "fish (if not allergic)",
+    "chicken",
+    "beef",
+    "pork",
+    "turkey",
+    "eggs",
+    "dairy products",
+    "plant-based seafood alternatives",
+    "tofu",
+    "mushrooms (texture substitute)",
+    "soy sauce (instead of fish sauce)",
+    "coconut aminos",
+    "vegetable broth",
+    "grains and legumes",
+    "fruits and vegetables"
+  ]
+}

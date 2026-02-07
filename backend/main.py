@@ -95,6 +95,81 @@ async def get_protocols(request: Request):
                 "id": "low_residue",
                 "name": "Low-Residue Diet",
                 "description": "Limits high-fiber foods to reduce bowel movements"
+            },
+            {
+                "id": "gluten_free",
+                "name": "Gluten-Free",
+                "description": "Avoids gluten proteins found in wheat, barley, and rye"
+            },
+            {
+                "id": "dairy_free",
+                "name": "Dairy-Free",
+                "description": "Avoids all milk and dairy products"
+            },
+            {
+                "id": "nut_free",
+                "name": "Nut-Free",
+                "description": "Avoids all tree nuts - critical for life-threatening allergies"
+            },
+            {
+                "id": "peanut_free",
+                "name": "Peanut-Free",
+                "description": "Avoids peanuts and peanut products - for severe allergies"
+            },
+            {
+                "id": "soy_free",
+                "name": "Soy-Free",
+                "description": "Avoids soy and soy derivatives"
+            },
+            {
+                "id": "egg_free",
+                "name": "Egg-Free",
+                "description": "Avoids eggs and egg-derived ingredients"
+            },
+            {
+                "id": "shellfish_free",
+                "name": "Shellfish-Free",
+                "description": "Avoids all shellfish - critical for anaphylaxis prevention"
+            },
+            {
+                "id": "fish_free",
+                "name": "Fish-Free",
+                "description": "Avoids all fish and fish products"
+            },
+            {
+                "id": "pork_free",
+                "name": "Pork-Free",
+                "description": "Avoids pork and pork products"
+            },
+            {
+                "id": "red_meat_free",
+                "name": "Red Meat-Free",
+                "description": "Avoids beef, pork, lamb, and other red meats"
+            },
+            {
+                "id": "vegan",
+                "name": "Vegan",
+                "description": "Avoids all animal products and derivatives"
+            },
+            {
+                "id": "vegetarian",
+                "name": "Vegetarian",
+                "description": "Avoids meat, poultry, and seafood"
+            },
+            {
+                "id": "paleo",
+                "name": "Paleo",
+                "description": "Avoids grains, legumes, dairy, and processed foods"
+            },
+            {
+                "id": "keto",
+                "name": "Keto (Low-Carb)",
+                "description": "Very low carbohydrate, high fat diet"
+            },
+            {
+                "id": "low_histamine",
+                "name": "Low-Histamine",
+                "description": "Avoids high-histamine and histamine-releasing foods"
             }
         ]
     }
@@ -132,12 +207,17 @@ async def analyze_menu(
     limiter.limit(rate_limit)(analyze_menu)
 
     # Validate protocols
-    valid_protocols = {"low_fodmap", "scd", "low_residue"}
+    valid_protocols = {
+        "low_fodmap", "scd", "low_residue", "gluten_free", "dairy_free",
+        "nut_free", "peanut_free", "soy_free", "egg_free", "shellfish_free",
+        "fish_free", "pork_free", "red_meat_free", "vegan", "vegetarian",
+        "paleo", "keto", "low_histamine"
+    }
     for protocol in request.protocols:
         if protocol not in valid_protocols:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid protocol: {protocol}. Valid options: {valid_protocols}"
+                detail=f"Invalid protocol: {protocol}. Valid options: {sorted(valid_protocols)}"
             )
 
     if not request.protocols:

@@ -1,0 +1,190 @@
+{
+  "protocol_id": "low_histamine",
+  "protocol_name": "Low-Histamine",
+  "description": "Avoids high-histamine foods and histamine-releasing foods - for histamine intolerance, MCAS, or allergic conditions",
+  "trigger_categories": {
+    "fermented_foods": {
+      "description": "Fermented and aged foods high in histamine",
+      "triggers": [
+        "aged cheese",
+        "parmesan",
+        "blue cheese",
+        "cheddar",
+        "gouda",
+        "sauerkraut",
+        "kimchi",
+        "pickles",
+        "pickled vegetables",
+        "miso",
+        "tempeh",
+        "soy sauce",
+        "tamari",
+        "fish sauce",
+        "worcestershire sauce",
+        "kefir",
+        "kombucha",
+        "yogurt",
+        "sour cream",
+        "buttermilk",
+        "sourdough bread"
+      ]
+    },
+    "aged_cured_meats": {
+      "description": "Aged, cured, or processed meats",
+      "triggers": [
+        "salami",
+        "pepperoni",
+        "bacon",
+        "ham",
+        "prosciutto",
+        "sausage",
+        "hot dogs",
+        "deli meat",
+        "lunch meat",
+        "smoked meat",
+        "cured meat",
+        "jerky"
+      ]
+    },
+    "fish_seafood": {
+      "description": "Fish and seafood (especially if not fresh)",
+      "triggers": [
+        "canned fish",
+        "canned tuna",
+        "sardines",
+        "anchovies",
+        "mackerel",
+        "herring",
+        "smoked fish",
+        "shellfish",
+        "shrimp",
+        "crab",
+        "lobster"
+      ]
+    },
+    "certain_vegetables": {
+      "description": "Vegetables that are high in histamine or histamine-releasing",
+      "triggers": [
+        "tomatoes",
+        "tomato sauce",
+        "ketchup",
+        "eggplant",
+        "spinach",
+        "avocado",
+        "mushrooms"
+      ]
+    },
+    "certain_fruits": {
+      "description": "Fruits high in histamine or histamine-releasing",
+      "triggers": [
+        "citrus fruits",
+        "oranges",
+        "lemons",
+        "limes",
+        "grapefruit",
+        "strawberries",
+        "bananas",
+        "pineapple",
+        "papaya",
+        "kiwi",
+        "dried fruit",
+        "raisins"
+      ]
+    },
+    "alcohol": {
+      "description": "Alcoholic beverages",
+      "triggers": [
+        "wine",
+        "red wine",
+        "champagne",
+        "beer",
+        "spirits",
+        "liquor"
+      ]
+    },
+    "vinegar_products": {
+      "description": "Vinegar and vinegar-containing foods",
+      "triggers": [
+        "vinegar",
+        "balsamic vinegar",
+        "apple cider vinegar",
+        "pickles",
+        "olives",
+        "salad dressing",
+        "mustard",
+        "mayonnaise"
+      ]
+    },
+    "leftovers": {
+      "description": "Leftovers and not-fresh foods",
+      "triggers": [
+        "leftovers",
+        "reheated food",
+        "food stored for days",
+        "old produce",
+        "non-fresh meat"
+      ]
+    },
+    "histamine_liberators": {
+      "description": "Foods that trigger histamine release",
+      "triggers": [
+        "chocolate",
+        "cocoa",
+        "nuts",
+        "peanuts",
+        "cashews",
+        "walnuts",
+        "egg whites",
+        "shellfish",
+        "additives",
+        "preservatives",
+        "artificial colors",
+        "msg"
+      ]
+    }
+  },
+  "common_restaurant_triggers": [
+    "aged cheese",
+    "tomato sauce",
+    "pizza",
+    "pasta with tomato sauce",
+    "soy sauce",
+    "teriyaki",
+    "vinegar dressing",
+    "pickles",
+    "olives",
+    "bacon",
+    "sausage",
+    "cured meats",
+    "smoked fish",
+    "shellfish",
+    "wine sauce",
+    "mushrooms",
+    "spinach",
+    "avocado",
+    "chocolate desserts",
+    "leftovers"
+  ],
+  "safe_alternatives": [
+    "fresh meat (cooked immediately)",
+    "fresh poultry",
+    "fresh white fish (cooked immediately)",
+    "fresh eggs (egg yolks are better tolerated)",
+    "fresh milk",
+    "fresh cream cheese",
+    "ricotta cheese",
+    "mozzarella cheese",
+    "fresh vegetables (except tomatoes, spinach, eggplant)",
+    "fresh fruits (apples, pears, blueberries, melon)",
+    "rice",
+    "quinoa",
+    "oats",
+    "gluten-free grains",
+    "olive oil",
+    "coconut oil",
+    "butter",
+    "fresh herbs",
+    "salt",
+    "black pepper"
+  ]
+}

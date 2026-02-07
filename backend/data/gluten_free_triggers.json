@@ -1,0 +1,130 @@
+{
+  "protocol_id": "gluten_free",
+  "protocol_name": "Gluten-Free",
+  "description": "Avoids gluten protein found in wheat, barley, rye, and their derivatives - critical for celiac disease and gluten sensitivity",
+  "trigger_categories": {
+    "wheat_products": {
+      "description": "Wheat and wheat derivatives in all forms",
+      "triggers": [
+        "wheat",
+        "wheat flour",
+        "whole wheat",
+        "durum wheat",
+        "semolina",
+        "spelt",
+        "kamut",
+        "einkorn",
+        "farro",
+        "wheat berries",
+        "bulgur",
+        "wheat bran",
+        "wheat germ",
+        "couscous",
+        "triticale",
+        "bread",
+        "pasta",
+        "noodles",
+        "breadcrumbs",
+        "croutons",
+        "pizza dough",
+        "tortillas (flour)",
+        "pita bread",
+        "bagels",
+        "buns",
+        "rolls"
+      ]
+    },
+    "barley_products": {
+      "description": "Barley and barley-derived ingredients",
+      "triggers": [
+        "barley",
+        "malt",
+        "malt extract",
+        "malt flavoring",
+        "malt vinegar",
+        "malted milk",
+        "barley malt syrup",
+        "beer",
+        "ale",
+        "lager"
+      ]
+    },
+    "rye_products": {
+      "description": "Rye and rye-containing foods",
+      "triggers": [
+        "rye",
+        "rye flour",
+        "rye bread",
+        "pumpernickel",
+        "rye crackers"
+      ]
+    },
+    "hidden_gluten": {
+      "description": "Less obvious sources of gluten in processed foods and sauces",
+      "triggers": [
+        "soy sauce",
+        "teriyaki sauce",
+        "seitan",
+        "imitation crab",
+        "surimi",
+        "breaded",
+        "battered",
+        "panko",
+        "gravy",
+        "cream sauce",
+        "thickened sauce",
+        "modified food starch",
+        "hydrolyzed wheat protein",
+        "textured vegetable protein",
+        "natural flavoring",
+        "caramel color",
+        "oats",
+        "oatmeal",
+        "granola"
+      ]
+    }
+  },
+  "common_restaurant_triggers": [
+    "breaded",
+    "battered",
+    "fried",
+    "flour tortilla",
+    "soy sauce",
+    "teriyaki",
+    "bread",
+    "pasta",
+    "pizza",
+    "sandwich",
+    "burger bun",
+    "gravy",
+    "cream sauce",
+    "beer batter",
+    "croutons",
+    "stuffing",
+    "malt vinegar",
+    "imitation crab"
+  ],
+  "safe_alternatives": [
+    "rice",
+    "quinoa",
+    "corn tortillas",
+    "rice noodles",
+    "gluten-free bread",
+    "gluten-free pasta",
+    "potatoes",
+    "certified gluten-free oats",
+    "tamari (gluten-free soy sauce)",
+    "corn",
+    "buckwheat",
+    "millet",
+    "amaranth",
+    "teff",
+    "sorghum",
+    "most meats and fish (unbreaded)",
+    "eggs",
+    "dairy products (plain)",
+    "fruits and vegetables",
+    "nuts and seeds",
+    "beans and legumes"
+  ]
+}

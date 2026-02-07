@@ -1,0 +1,105 @@
+{
+  "protocol_id": "peanut_free",
+  "protocol_name": "Peanut-Free",
+  "description": "Avoids peanuts and peanut products - CRITICAL for life-threatening peanut allergy and anaphylaxis prevention",
+  "trigger_categories": {
+    "peanut_products": {
+      "description": "Direct peanut products",
+      "triggers": [
+        "peanuts",
+        "groundnuts",
+        "goobers",
+        "peanut butter",
+        "peanut oil",
+        "cold-pressed peanut oil",
+        "peanut flour",
+        "peanut protein",
+        "peanut paste"
+      ]
+    },
+    "peanut_containing_foods": {
+      "description": "Common foods containing peanuts",
+      "triggers": [
+        "peanut sauce",
+        "satay sauce",
+        "pad thai",
+        "kung pao",
+        "dan dan noodles",
+        "peanut brittle",
+        "peanut clusters",
+        "peanut candy",
+        "reese's",
+        "snickers",
+        "payday bars",
+        "baby ruth",
+        "butterfinger",
+        "peanut butter cups",
+        "peanut m&ms",
+        "peanut cookies",
+        "peanut butter cookies",
+        "nutter butter",
+        "boiled peanuts",
+        "beer nuts"
+      ]
+    },
+    "hidden_peanuts": {
+      "description": "Less obvious sources of peanuts",
+      "triggers": [
+        "african cuisine",
+        "thai cuisine",
+        "vietnamese cuisine",
+        "chinese cuisine",
+        "mexican mole sauce",
+        "chili",
+        "stew",
+        "energy bars",
+        "granola bars",
+        "protein bars",
+        "trail mix",
+        "mixed nuts",
+        "ice cream toppings",
+        "sundae",
+        "nougat",
+        "marzipan substitute",
+        "artificial nuts",
+        "mandelonas",
+        "nu-nuts",
+        "vegetarian meat substitutes",
+        "some baked goods",
+        "some crackers",
+        "some cereals"
+      ]
+    }
+  },
+  "common_restaurant_triggers": [
+    "peanut sauce",
+    "satay",
+    "pad thai",
+    "kung pao",
+    "dan dan noodles",
+    "african peanut stew",
+    "thai curry",
+    "vietnamese spring rolls",
+    "mole sauce",
+    "some chili",
+    "peanut dressing",
+    "ice cream sundae",
+    "dessert with peanuts",
+    "mixed nuts appetizer",
+    "bar snacks"
+  ],
+  "safe_alternatives": [
+    "almond butter (if nut allergy allows)",
+    "sunflower seed butter",
+    "soy nut butter",
+    "tahini (sesame)",
+    "refined peanut oil (may be safe - check with doctor)",
+    "sunflower seeds",
+    "pumpkin seeds",
+    "plain meats and fish",
+    "eggs",
+    "dairy products",
+    "grains and legumes (other than peanuts)",
+    "fruits and vegetables"
+  ]
+}

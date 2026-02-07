@@ -1,0 +1,179 @@
+{
+  "protocol_id": "dairy_free",
+  "protocol_name": "Dairy-Free",
+  "description": "Avoids all milk and milk-derived products - for lactose intolerance, milk protein allergy, or vegan diet",
+  "trigger_categories": {
+    "milk_products": {
+      "description": "Direct milk and milk-based beverages",
+      "triggers": [
+        "milk",
+        "whole milk",
+        "skim milk",
+        "2% milk",
+        "1% milk",
+        "buttermilk",
+        "evaporated milk",
+        "condensed milk",
+        "sweetened condensed milk",
+        "powdered milk",
+        "milk solids",
+        "malted milk",
+        "chocolate milk",
+        "milkshake"
+      ]
+    },
+    "cream_products": {
+      "description": "Cream and cream-based products",
+      "triggers": [
+        "cream",
+        "heavy cream",
+        "whipping cream",
+        "half and half",
+        "sour cream",
+        "crème fraîche",
+        "clotted cream",
+        "coffee creamer",
+        "non-dairy creamer"
+      ]
+    },
+    "cheese_products": {
+      "description": "All cheese varieties",
+      "triggers": [
+        "cheese",
+        "cheddar",
+        "mozzarella",
+        "parmesan",
+        "swiss",
+        "provolone",
+        "gouda",
+        "brie",
+        "camembert",
+        "feta",
+        "blue cheese",
+        "gorgonzola",
+        "ricotta",
+        "cottage cheese",
+        "cream cheese",
+        "mascarpone",
+        "queso",
+        "cheese sauce",
+        "nacho cheese",
+        "parmesan crust"
+      ]
+    },
+    "butter_products": {
+      "description": "Butter and butter-based spreads",
+      "triggers": [
+        "butter",
+        "clarified butter",
+        "ghee",
+        "butter oil",
+        "buttercream",
+        "butter sauce",
+        "drawn butter",
+        "compound butter"
+      ]
+    },
+    "yogurt_products": {
+      "description": "Yogurt and fermented milk products",
+      "triggers": [
+        "yogurt",
+        "greek yogurt",
+        "frozen yogurt",
+        "kefir",
+        "lassi",
+        "yogurt sauce",
+        "raita"
+      ]
+    },
+    "ice_cream_products": {
+      "description": "Frozen dairy desserts",
+      "triggers": [
+        "ice cream",
+        "gelato",
+        "soft serve",
+        "sherbet",
+        "frozen custard",
+        "ice cream cake"
+      ]
+    },
+    "hidden_dairy": {
+      "description": "Less obvious dairy ingredients in processed foods",
+      "triggers": [
+        "whey",
+        "whey protein",
+        "whey powder",
+        "casein",
+        "caseinate",
+        "sodium caseinate",
+        "calcium caseinate",
+        "lactalbumin",
+        "lactoglobulin",
+        "lactose",
+        "milk protein",
+        "milk fat",
+        "curds",
+        "custard",
+        "pudding",
+        "alfredo sauce",
+        "béchamel",
+        "carbonara",
+        "creamy soup",
+        "ranch dressing",
+        "blue cheese dressing",
+        "caesar dressing",
+        "mashed potatoes",
+        "au gratin",
+        "quiche"
+      ]
+    }
+  },
+  "common_restaurant_triggers": [
+    "cheese",
+    "butter",
+    "cream sauce",
+    "alfredo",
+    "carbonara",
+    "parmesan",
+    "mozzarella",
+    "ranch",
+    "blue cheese",
+    "caesar dressing",
+    "creamy soup",
+    "mashed potatoes",
+    "au gratin",
+    "scalloped",
+    "gratinée",
+    "pizza",
+    "quesadilla",
+    "mac and cheese",
+    "fettuccine alfredo",
+    "béchamel",
+    "hollandaise"
+  ],
+  "safe_alternatives": [
+    "almond milk",
+    "oat milk",
+    "soy milk",
+    "coconut milk",
+    "cashew milk",
+    "rice milk",
+    "hemp milk",
+    "coconut cream",
+    "olive oil",
+    "vegetable oil",
+    "coconut oil",
+    "vegan butter",
+    "nutritional yeast (cheese flavor)",
+    "vegan cheese",
+    "cashew cream",
+    "coconut yogurt",
+    "almond yogurt",
+    "sorbet",
+    "dairy-free ice cream",
+    "most meats and fish (plain)",
+    "eggs (not dairy)",
+    "fruits and vegetables",
+    "grains and legumes"
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "protocol_id": "keto",
+  "protocol_name": "Keto (Low-Carb)",
+  "description": "Very low carbohydrate, high fat diet - limits carbs to 20-50g per day to maintain ketosis",
+  "trigger_categories": {
+    "grains_starches": {
+      "description": "All grains, bread, pasta, and starches",
+      "triggers": [
+        "wheat",
+        "bread",
+        "pasta",
+        "rice",
+        "oats",
+        "cereal",
+        "crackers",
+        "tortillas",
+        "pizza crust",
+        "bagels",
+        "muffins",
+        "corn",
+        "popcorn",
+        "quinoa",
+        "couscous",
+        "noodles",
+        "potatoes",
+        "french fries",
+        "chips",
+        "sweet potatoes",
+        "yams"
+      ]
+    },
+    "sugars_sweeteners": {
+      "description": "All forms of sugar and most sweeteners",
+      "triggers": [
+        "sugar",
+        "honey",
+        "maple syrup",
+        "agave",
+        "corn syrup",
+        "candy",
+        "chocolate",
+        "desserts",
+        "cake",
+        "cookies",
+        "ice cream",
+        "soda",
+        "juice",
+        "sweetened beverages",
+        "energy drinks"
+      ]
+    },
+    "high_carb_fruits": {
+      "description": "High-sugar fruits",
+      "triggers": [
+        "bananas",
+        "apples",
+        "oranges",
+        "grapes",
+        "pears",
+        "pineapple",
+        "mango",
+        "watermelon",
+        "dried fruit",
+        "fruit juice",
+        "fruit smoothies"
+      ]
+    },
+    "legumes": {
+      "description": "Beans and legumes",
+      "triggers": [
+        "beans",
+        "lentils",
+        "chickpeas",
+        "black beans",
+        "kidney beans",
+        "pinto beans",
+        "peas",
+        "hummus"
+      ]
+    },
+    "processed_low_fat": {
+      "description": "Low-fat and processed foods",
+      "triggers": [
+        "low-fat milk",
+        "skim milk",
+        "low-fat yogurt",
+        "low-fat cheese",
+        "low-fat dressing",
+        "margarine",
+        "vegetable oils",
+        "trans fats",
+        "processed foods"
+      ]
+    },
+    "hidden_carbs": {
+      "description": "Foods with hidden carbohydrates",
+      "triggers": [
+        "breaded foods",
+        "battered foods",
+        "sauces with sugar",
+        "ketchup",
+        "bbq sauce",
+        "teriyaki sauce",
+        "sweet and sour sauce",
+        "glazed meats",
+        "some salad dressings",
+        "milk",
+        "flavored yogurt"
+      ]
+    }
+  },
+  "common_restaurant_triggers": [
+    "bread",
+    "pasta",
+    "rice",
+    "pizza",
+    "potatoes",
+    "french fries",
+    "tortillas",
+    "beans",
+    "corn",
+    "breaded",
+    "battered",
+    "glazed",
+    "teriyaki",
+    "sweet sauce",
+    "ketchup",
+    "bbq sauce",
+    "desserts",
+    "soda",
+    "juice",
+    "sweetened drinks"
+  ],
+  "safe_alternatives": [
+    "meat (beef, pork, lamb)",
+    "poultry (chicken, turkey)",
+    "fish and seafood",
+    "eggs",
+    "full-fat dairy (cheese, butter, cream)",
+    "greek yogurt (unsweetened)",
+    "low-carb vegetables (leafy greens, broccoli, cauliflower, zucchini)",
+    "avocados",
+    "berries (in moderation)",
+    "nuts and seeds (almonds, walnuts, chia)",
+    "healthy fats (olive oil, coconut oil, avocado oil)",
+    "butter and ghee",
+    "cauliflower rice",
+    "zucchini noodles",
+    "almond flour",
+    "coconut flour",
+    "stevia",
+    "erythritol",
+    "monk fruit sweetener"
+  ]
+}

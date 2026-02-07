@@ -1,0 +1,151 @@
+{
+  "protocol_id": "egg_free",
+  "protocol_name": "Egg-Free",
+  "description": "Avoids eggs and egg-derived ingredients - for egg allergy or vegan diet",
+  "trigger_categories": {
+    "egg_products": {
+      "description": "Direct egg products",
+      "triggers": [
+        "eggs",
+        "whole eggs",
+        "egg whites",
+        "egg yolks",
+        "egg powder",
+        "dried eggs",
+        "egg solids",
+        "egg substitute",
+        "powdered eggs",
+        "reconstituted eggs",
+        "scrambled eggs",
+        "fried eggs",
+        "hard-boiled eggs",
+        "soft-boiled eggs",
+        "poached eggs",
+        "deviled eggs",
+        "egg salad",
+        "omelet",
+        "frittata",
+        "quiche"
+      ]
+    },
+    "egg_derivatives": {
+      "description": "Egg-derived ingredients",
+      "triggers": [
+        "albumin",
+        "globulin",
+        "lysozyme",
+        "ovalbumin",
+        "ovomucin",
+        "ovomucoid",
+        "ovovitellin",
+        "lecithin",
+        "livetin",
+        "vitellin",
+        "simplesse"
+      ]
+    },
+    "egg_containing_sauces": {
+      "description": "Sauces and condiments made with eggs",
+      "triggers": [
+        "mayonnaise",
+        "aioli",
+        "hollandaise sauce",
+        "béarnaise sauce",
+        "caesar dressing",
+        "ranch dressing",
+        "tartar sauce",
+        "remoulade"
+      ]
+    },
+    "baked_goods": {
+      "description": "Baked goods typically containing eggs",
+      "triggers": [
+        "cake",
+        "cupcakes",
+        "muffins",
+        "cookies",
+        "brownies",
+        "donuts",
+        "pastries",
+        "croissants",
+        "danish",
+        "brioche",
+        "challah",
+        "egg bread",
+        "french toast",
+        "pancakes",
+        "waffles",
+        "crepes",
+        "biscuits",
+        "scones"
+      ]
+    },
+    "egg_containing_foods": {
+      "description": "Other foods commonly containing eggs",
+      "triggers": [
+        "pasta",
+        "egg noodles",
+        "ramen",
+        "breading",
+        "battered",
+        "tempura",
+        "meringue",
+        "marshmallows",
+        "nougat",
+        "custard",
+        "pudding",
+        "ice cream",
+        "eggnog",
+        "meatballs",
+        "meatloaf",
+        "crab cakes",
+        "fish cakes",
+        "souffle",
+        "egg wash"
+      ]
+    }
+  },
+  "common_restaurant_triggers": [
+    "eggs",
+    "omelet",
+    "quiche",
+    "frittata",
+    "egg sandwich",
+    "mayonnaise",
+    "caesar dressing",
+    "ranch dressing",
+    "hollandaise",
+    "aioli",
+    "breaded",
+    "battered",
+    "tempura",
+    "french toast",
+    "pancakes",
+    "waffles",
+    "pasta",
+    "egg noodles",
+    "custard",
+    "ice cream",
+    "meatballs",
+    "meatloaf",
+    "crab cakes"
+  ],
+  "safe_alternatives": [
+    "flax eggs (1 tbsp ground flax + 3 tbsp water)",
+    "chia eggs (1 tbsp chia seeds + 3 tbsp water)",
+    "applesauce (for baking)",
+    "mashed banana (for baking)",
+    "commercial egg replacer",
+    "aquafaba (chickpea liquid)",
+    "silken tofu",
+    "vegan mayonnaise",
+    "vinaigrette dressings",
+    "rice noodles",
+    "egg-free pasta",
+    "sorbet (instead of ice cream)",
+    "meats and fish (plain)",
+    "dairy products (plain)",
+    "grains and legumes",
+    "fruits and vegetables"
+  ]
+}

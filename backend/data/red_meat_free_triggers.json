@@ -1,0 +1,182 @@
+{
+  "protocol_id": "red_meat_free",
+  "protocol_name": "Red Meat-Free",
+  "description": "Avoids red meat - for health reasons (cardiovascular health, iron metabolism), environmental concerns, or personal preference",
+  "trigger_categories": {
+    "beef": {
+      "description": "All beef products",
+      "triggers": [
+        "beef",
+        "steak",
+        "ribeye",
+        "sirloin",
+        "t-bone",
+        "filet mignon",
+        "ground beef",
+        "hamburger",
+        "burger",
+        "beef patty",
+        "roast beef",
+        "prime rib",
+        "brisket",
+        "beef ribs",
+        "beef tenderloin",
+        "beef chuck",
+        "corned beef",
+        "pastrami",
+        "beef jerky"
+      ]
+    },
+    "pork": {
+      "description": "All pork products",
+      "triggers": [
+        "pork",
+        "pork chops",
+        "pork loin",
+        "pork tenderloin",
+        "pork shoulder",
+        "pork belly",
+        "ground pork",
+        "pork ribs",
+        "pulled pork",
+        "bacon",
+        "ham",
+        "prosciutto",
+        "pancetta",
+        "pork sausage"
+      ]
+    },
+    "lamb_goat": {
+      "description": "Lamb, mutton, and goat meat",
+      "triggers": [
+        "lamb",
+        "lamb chops",
+        "leg of lamb",
+        "lamb shank",
+        "ground lamb",
+        "lamb kebab",
+        "mutton",
+        "goat",
+        "goat meat",
+        "cabrito",
+        "chevon"
+      ]
+    },
+    "veal_game": {
+      "description": "Veal and game meats",
+      "triggers": [
+        "veal",
+        "veal cutlet",
+        "veal chop",
+        "venison",
+        "deer",
+        "elk",
+        "bison",
+        "buffalo",
+        "wild boar",
+        "rabbit",
+        "game meat"
+      ]
+    },
+    "processed_red_meat": {
+      "description": "Processed red meat products",
+      "triggers": [
+        "salami",
+        "pepperoni",
+        "chorizo",
+        "sausage",
+        "hot dogs",
+        "bologna",
+        "bratwurst",
+        "kielbasa",
+        "deli meat",
+        "lunch meat",
+        "beef jerky",
+        "meat sticks"
+      ]
+    },
+    "red_meat_fats": {
+      "description": "Red meat-derived fats",
+      "triggers": [
+        "beef tallow",
+        "lard",
+        "suet",
+        "beef fat",
+        "pork fat",
+        "bacon grease"
+      ]
+    },
+    "hidden_red_meat": {
+      "description": "Less obvious sources of red meat",
+      "triggers": [
+        "beef broth",
+        "beef stock",
+        "bone broth",
+        "pork broth",
+        "meat sauce",
+        "bolognese",
+        "meat gravy",
+        "some meatballs",
+        "meatloaf",
+        "chili con carne",
+        "some tacos",
+        "some burritos",
+        "some lasagna",
+        "beef fat in fried foods",
+        "tallow in french fries"
+      ]
+    }
+  },
+  "common_restaurant_triggers": [
+    "beef",
+    "steak",
+    "burger",
+    "hamburger",
+    "pork",
+    "bacon",
+    "ham",
+    "lamb",
+    "veal",
+    "sausage",
+    "pepperoni",
+    "salami",
+    "hot dogs",
+    "meatballs",
+    "meat sauce",
+    "bolognese",
+    "chili",
+    "beef broth",
+    "pork broth",
+    "beef tacos",
+    "carnitas"
+  ],
+  "safe_alternatives": [
+    "chicken",
+    "turkey",
+    "duck",
+    "quail",
+    "fish",
+    "salmon",
+    "tuna",
+    "cod",
+    "tilapia",
+    "shellfish",
+    "shrimp",
+    "crab",
+    "lobster",
+    "scallops",
+    "eggs",
+    "dairy products",
+    "plant-based meat alternatives",
+    "tofu",
+    "tempeh",
+    "seitan",
+    "beans and legumes",
+    "nuts and seeds",
+    "mushrooms",
+    "chicken broth",
+    "vegetable broth",
+    "olive oil",
+    "vegetable oils"
+  ]
+}

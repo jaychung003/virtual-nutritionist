@@ -1,0 +1,185 @@
+{
+  "protocol_id": "vegan",
+  "protocol_name": "Vegan",
+  "description": "Avoids all animal products and animal-derived ingredients - for ethical, environmental, or health reasons",
+  "trigger_categories": {
+    "meat_poultry": {
+      "description": "All meat and poultry",
+      "triggers": [
+        "beef",
+        "pork",
+        "lamb",
+        "veal",
+        "chicken",
+        "turkey",
+        "duck",
+        "goose",
+        "game meat",
+        "bacon",
+        "ham",
+        "sausage",
+        "hot dogs",
+        "deli meat",
+        "jerky",
+        "salami",
+        "pepperoni",
+        "prosciutto",
+        "lard",
+        "tallow",
+        "suet"
+      ]
+    },
+    "seafood": {
+      "description": "All fish and shellfish",
+      "triggers": [
+        "fish",
+        "salmon",
+        "tuna",
+        "cod",
+        "shrimp",
+        "crab",
+        "lobster",
+        "clams",
+        "mussels",
+        "oysters",
+        "scallops",
+        "squid",
+        "octopus",
+        "anchovy",
+        "sardines",
+        "caviar",
+        "roe",
+        "fish sauce",
+        "oyster sauce",
+        "surimi",
+        "imitation crab"
+      ]
+    },
+    "dairy_products": {
+      "description": "All dairy and dairy derivatives",
+      "triggers": [
+        "milk",
+        "cream",
+        "butter",
+        "ghee",
+        "cheese",
+        "yogurt",
+        "ice cream",
+        "whey",
+        "casein",
+        "lactose",
+        "buttermilk",
+        "sour cream",
+        "cottage cheese",
+        "ricotta",
+        "cream cheese"
+      ]
+    },
+    "eggs": {
+      "description": "Eggs and egg products",
+      "triggers": [
+        "eggs",
+        "egg whites",
+        "egg yolks",
+        "mayonnaise",
+        "albumin",
+        "lysozyme",
+        "egg powder"
+      ]
+    },
+    "honey_bee_products": {
+      "description": "Products from bees",
+      "triggers": [
+        "honey",
+        "beeswax",
+        "royal jelly",
+        "bee pollen",
+        "propolis",
+        "honeycomb"
+      ]
+    },
+    "hidden_animal_products": {
+      "description": "Less obvious animal-derived ingredients",
+      "triggers": [
+        "gelatin",
+        "collagen",
+        "rennet",
+        "carmine",
+        "cochineal",
+        "shellac",
+        "isinglass",
+        "lanolin",
+        "tallow",
+        "lard",
+        "suet",
+        "bone char",
+        "l-cysteine",
+        "pepsin",
+        "castor",
+        "castoreum",
+        "some wines",
+        "some beers",
+        "some white sugar",
+        "gummy candy",
+        "marshmallows",
+        "jell-o",
+        "some red food coloring"
+      ]
+    },
+    "broths_stocks": {
+      "description": "Animal-based broths and stocks",
+      "triggers": [
+        "chicken broth",
+        "beef broth",
+        "fish stock",
+        "bone broth",
+        "meat stock",
+        "chicken stock",
+        "demi-glace"
+      ]
+    }
+  },
+  "common_restaurant_triggers": [
+    "meat",
+    "chicken",
+    "fish",
+    "shrimp",
+    "cheese",
+    "butter",
+    "cream sauce",
+    "eggs",
+    "mayonnaise",
+    "honey",
+    "gelatin desserts",
+    "chicken broth",
+    "beef broth",
+    "parmesan",
+    "caesar dressing",
+    "ranch dressing",
+    "ice cream",
+    "whipped cream"
+  ],
+  "safe_alternatives": [
+    "beans and legumes",
+    "tofu",
+    "tempeh",
+    "seitan",
+    "nuts and seeds",
+    "plant-based milk (almond, soy, oat, coconut)",
+    "vegan butter",
+    "nutritional yeast (cheese flavor)",
+    "vegan cheese",
+    "flax eggs",
+    "chia eggs",
+    "vegan mayonnaise",
+    "maple syrup (instead of honey)",
+    "agave syrup",
+    "vegetable broth",
+    "mushrooms",
+    "jackfruit (meat texture)",
+    "all fruits and vegetables",
+    "grains and rice",
+    "quinoa",
+    "pasta (egg-free)"
+  ]
+}

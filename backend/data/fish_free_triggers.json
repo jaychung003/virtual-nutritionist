@@ -1,0 +1,133 @@
+{
+  "protocol_id": "fish_free",
+  "protocol_name": "Fish-Free",
+  "description": "Avoids all fish and fish products - for fish allergy or dietary preference",
+  "trigger_categories": {
+    "finned_fish": {
+      "description": "All finned fish varieties",
+      "triggers": [
+        "salmon",
+        "tuna",
+        "cod",
+        "halibut",
+        "tilapia",
+        "mahi-mahi",
+        "trout",
+        "bass",
+        "snapper",
+        "grouper",
+        "swordfish",
+        "catfish",
+        "sardines",
+        "anchovies",
+        "herring",
+        "mackerel",
+        "haddock",
+        "pollock",
+        "flounder",
+        "sole",
+        "sea bass",
+        "perch",
+        "pike",
+        "barramundi",
+        "pompano"
+      ]
+    },
+    "fish_products": {
+      "description": "Products derived from fish",
+      "triggers": [
+        "fish sauce",
+        "anchovy paste",
+        "fish stock",
+        "fish broth",
+        "fish oil",
+        "omega-3 supplements",
+        "fish gelatin",
+        "surimi",
+        "imitation crab",
+        "caviar",
+        "roe",
+        "fish eggs",
+        "bottarga",
+        "fish roe spread"
+      ]
+    },
+    "fish_containing_sauces": {
+      "description": "Sauces and condiments containing fish",
+      "triggers": [
+        "worcestershire sauce",
+        "caesar dressing",
+        "caesar salad",
+        "fish sauce",
+        "nuoc mam",
+        "nam pla",
+        "patis",
+        "anchovy sauce",
+        "putanesca sauce",
+        "bagna cauda",
+        "some barbecue sauces",
+        "some salad dressings"
+      ]
+    },
+    "hidden_fish": {
+      "description": "Less obvious sources of fish",
+      "triggers": [
+        "asian cuisine",
+        "thai food",
+        "vietnamese food",
+        "mediterranean cuisine",
+        "italian sauces",
+        "bouillabaisse",
+        "cioppino",
+        "paella",
+        "kedgeree",
+        "some pizza toppings",
+        "some capers",
+        "caponata"
+      ]
+    }
+  },
+  "common_restaurant_triggers": [
+    "fish",
+    "salmon",
+    "tuna",
+    "cod",
+    "tilapia",
+    "fish and chips",
+    "fish tacos",
+    "sushi",
+    "sashimi",
+    "fish sauce",
+    "worcestershire sauce",
+    "caesar salad",
+    "caesar dressing",
+    "anchovy pizza",
+    "putanesca",
+    "bouillabaisse",
+    "cioppino",
+    "paella",
+    "imitation crab",
+    "omega-3 enriched foods"
+  ],
+  "safe_alternatives": [
+    "chicken",
+    "beef",
+    "pork",
+    "turkey",
+    "lamb",
+    "shellfish (if not allergic)",
+    "eggs",
+    "dairy products",
+    "plant-based seafood alternatives",
+    "tofu",
+    "tempeh",
+    "seitan",
+    "beans and legumes",
+    "flax seeds (omega-3)",
+    "chia seeds (omega-3)",
+    "walnuts (omega-3)",
+    "algae-based omega-3",
+    "soy sauce (instead of fish sauce)",
+    "coconut aminos"
+  ]
+}

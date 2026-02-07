@@ -23,7 +23,22 @@ def load_protocol_triggers(protocols: List[str]) -> Dict[str, any]:
     protocol_files = {
         "low_fodmap": "fodmap_triggers.json",
         "scd": "scd_triggers.json",
-        "low_residue": "low_residue_triggers.json"
+        "low_residue": "low_residue_triggers.json",
+        "gluten_free": "gluten_free_triggers.json",
+        "dairy_free": "dairy_free_triggers.json",
+        "nut_free": "nut_free_triggers.json",
+        "peanut_free": "peanut_free_triggers.json",
+        "soy_free": "soy_free_triggers.json",
+        "egg_free": "egg_free_triggers.json",
+        "shellfish_free": "shellfish_free_triggers.json",
+        "fish_free": "fish_free_triggers.json",
+        "pork_free": "pork_free_triggers.json",
+        "red_meat_free": "red_meat_free_triggers.json",
+        "vegan": "vegan_triggers.json",
+        "vegetarian": "vegetarian_triggers.json",
+        "paleo": "paleo_triggers.json",
+        "keto": "keto_triggers.json",
+        "low_histamine": "low_histamine_triggers.json"
     }
     
     combined_triggers = {
@@ -51,7 +66,10 @@ def load_protocol_triggers(protocols: List[str]) -> Dict[str, any]:
             })
             
             # Extract all triggers from categories
-            categories = data.get("high_fodmap_categories") or \
+            # Support both old format (high_fodmap_categories, illegal_categories, high_residue_categories)
+            # and new format (trigger_categories)
+            categories = data.get("trigger_categories") or \
+                        data.get("high_fodmap_categories") or \
                         data.get("illegal_categories") or \
                         data.get("high_residue_categories", {})
             

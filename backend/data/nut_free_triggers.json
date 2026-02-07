@@ -1,0 +1,152 @@
+{
+  "protocol_id": "nut_free",
+  "protocol_name": "Tree Nut-Free",
+  "description": "Avoids all tree nuts - CRITICAL for life-threatening nut allergies and anaphylaxis prevention",
+  "trigger_categories": {
+    "common_tree_nuts": {
+      "description": "Most common tree nuts found in food",
+      "triggers": [
+        "almonds",
+        "cashews",
+        "walnuts",
+        "pecans",
+        "pistachios",
+        "hazelnuts",
+        "filberts",
+        "macadamia nuts",
+        "brazil nuts",
+        "pine nuts",
+        "pignoli",
+        "chestnuts",
+        "hickory nuts",
+        "beechnuts",
+        "ginkgo nuts",
+        "shea nuts",
+        "coconut"
+      ]
+    },
+    "nut_butters_spreads": {
+      "description": "Nut butters and spreads",
+      "triggers": [
+        "almond butter",
+        "cashew butter",
+        "hazelnut spread",
+        "nutella",
+        "almond paste",
+        "marzipan",
+        "gianduja",
+        "nut butter",
+        "praline paste"
+      ]
+    },
+    "nut_oils_milks": {
+      "description": "Oils and milks derived from nuts",
+      "triggers": [
+        "almond oil",
+        "walnut oil",
+        "hazelnut oil",
+        "macadamia oil",
+        "almond milk",
+        "cashew milk",
+        "hazelnut milk",
+        "macadamia milk",
+        "almond extract",
+        "almond flavoring"
+      ]
+    },
+    "nut_containing_foods": {
+      "description": "Common foods that contain or may contain nuts",
+      "triggers": [
+        "pesto",
+        "romesco sauce",
+        "satay sauce",
+        "baklava",
+        "nougat",
+        "pralines",
+        "marzipan",
+        "frangipane",
+        "dukkah",
+        "nut-crusted",
+        "nut-encrusted",
+        "almond-crusted fish",
+        "pecan-crusted chicken",
+        "walnut salad",
+        "candied nuts",
+        "spiced nuts",
+        "nut brittle",
+        "nut clusters",
+        "trail mix",
+        "granola",
+        "energy bars",
+        "protein bars",
+        "biscotti",
+        "amaretti cookies"
+      ]
+    },
+    "hidden_nuts": {
+      "description": "Less obvious sources of nuts in cuisine and processed foods",
+      "triggers": [
+        "natural flavoring",
+        "natural almond flavor",
+        "mortadella",
+        "pesto",
+        "some barbecue sauces",
+        "some ice creams",
+        "some chocolates",
+        "asian cuisine",
+        "thai dishes",
+        "chinese dishes",
+        "indian dishes",
+        "middle eastern desserts",
+        "turkish delight",
+        "halva",
+        "nut meal",
+        "nut flour",
+        "almond flour"
+      ]
+    }
+  },
+  "common_restaurant_triggers": [
+    "pesto",
+    "almond-crusted",
+    "pecan-crusted",
+    "walnut-crusted",
+    "nut-crusted",
+    "thai peanut sauce",
+    "satay",
+    "cashew chicken",
+    "kung pao",
+    "pad thai",
+    "nutella",
+    "baklava",
+    "praline",
+    "marzipan",
+    "almond paste",
+    "pistachio",
+    "walnut salad",
+    "candied pecans",
+    "pine nuts",
+    "romesco",
+    "amaretto",
+    "frangelico"
+  ],
+  "safe_alternatives": [
+    "sunflower seed butter",
+    "pumpkin seed butter",
+    "soy nut butter",
+    "seeds (sunflower, pumpkin, chia, hemp, flax)",
+    "oat milk",
+    "soy milk",
+    "rice milk",
+    "olive oil",
+    "vegetable oil",
+    "canola oil",
+    "basil pesto (nut-free)",
+    "breaded (not nut-crusted)",
+    "plain meats and fish",
+    "eggs",
+    "dairy products",
+    "grains and legumes",
+    "fruits and vegetables"
+  ]
+}

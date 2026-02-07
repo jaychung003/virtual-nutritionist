@@ -1,0 +1,125 @@
+{
+  "protocol_id": "pork_free",
+  "protocol_name": "Pork-Free",
+  "description": "Avoids pork and pork products - for religious dietary laws (halal, kosher), allergy, or personal preference",
+  "trigger_categories": {
+    "pork_meat": {
+      "description": "All pork meat products",
+      "triggers": [
+        "pork",
+        "pork chops",
+        "pork loin",
+        "pork tenderloin",
+        "pork shoulder",
+        "pork belly",
+        "ground pork",
+        "pork ribs",
+        "pork roast",
+        "pulled pork",
+        "pork steak"
+      ]
+    },
+    "pork_products": {
+      "description": "Processed pork products",
+      "triggers": [
+        "bacon",
+        "ham",
+        "prosciutto",
+        "pancetta",
+        "sausage",
+        "pork sausage",
+        "chorizo",
+        "salami",
+        "pepperoni",
+        "hot dogs",
+        "bratwurst",
+        "kielbasa",
+        "mortadella",
+        "capicola",
+        "guanciale",
+        "speck",
+        "canadian bacon",
+        "pork jerky"
+      ]
+    },
+    "pork_fats": {
+      "description": "Pork-derived fats and cooking ingredients",
+      "triggers": [
+        "lard",
+        "pork fat",
+        "bacon grease",
+        "pork drippings",
+        "pork rinds",
+        "chicharrones",
+        "crackling"
+      ]
+    },
+    "hidden_pork": {
+      "description": "Less obvious sources of pork",
+      "triggers": [
+        "some sausages",
+        "some meatballs",
+        "some dumplings",
+        "some spring rolls",
+        "some fried rice",
+        "some beans",
+        "pork broth",
+        "tonkotsu ramen",
+        "pork stock",
+        "some gelatin",
+        "some marshmallow",
+        "some gummy candy",
+        "some cheese",
+        "some enzymes",
+        "pepsin",
+        "some vitamins",
+        "some medications"
+      ]
+    }
+  },
+  "common_restaurant_triggers": [
+    "pork",
+    "bacon",
+    "ham",
+    "sausage",
+    "pepperoni",
+    "prosciutto",
+    "pancetta",
+    "pork belly",
+    "pulled pork",
+    "pork chops",
+    "pork ribs",
+    "chorizo",
+    "salami",
+    "hot dogs",
+    "bratwurst",
+    "lard",
+    "pork fried rice",
+    "tonkotsu ramen",
+    "pork broth",
+    "bacon bits"
+  ],
+  "safe_alternatives": [
+    "beef",
+    "chicken",
+    "turkey",
+    "lamb",
+    "goat",
+    "duck",
+    "fish",
+    "seafood",
+    "turkey bacon",
+    "beef sausage",
+    "chicken sausage",
+    "turkey sausage",
+    "lamb sausage",
+    "beef pepperoni",
+    "vegetable oil (instead of lard)",
+    "olive oil",
+    "butter",
+    "ghee",
+    "plant-based meat alternatives",
+    "tofu",
+    "tempeh"
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "protocol_id": "soy_free",
+  "protocol_name": "Soy-Free",
+  "description": "Avoids soy and soy derivatives - for soy allergy, hormone sensitivity, or thyroid concerns",
+  "trigger_categories": {
+    "soy_products": {
+      "description": "Direct soy products",
+      "triggers": [
+        "soybeans",
+        "edamame",
+        "soy sauce",
+        "shoyu",
+        "tamari",
+        "tofu",
+        "tempeh",
+        "miso",
+        "natto",
+        "soy milk",
+        "soy yogurt",
+        "soy cheese",
+        "soy ice cream",
+        "soy protein",
+        "soy protein isolate",
+        "textured vegetable protein",
+        "tvp",
+        "soybean oil",
+        "soy flour",
+        "soy nuts"
+      ]
+    },
+    "soy_derivatives": {
+      "description": "Soy-derived ingredients",
+      "triggers": [
+        "soy lecithin",
+        "lecithin",
+        "hydrolyzed soy protein",
+        "soy protein concentrate",
+        "soy protein hydrolysate",
+        "mono-diglyceride",
+        "monosodium glutamate",
+        "msg",
+        "vegetable gum",
+        "vegetable starch",
+        "vegetable broth"
+      ]
+    },
+    "soy_containing_sauces": {
+      "description": "Sauces and condiments with soy",
+      "triggers": [
+        "soy sauce",
+        "teriyaki sauce",
+        "worcestershire sauce",
+        "hoisin sauce",
+        "oyster sauce",
+        "ponzu sauce",
+        "shoyu sauce",
+        "tamari sauce",
+        "asian marinade",
+        "stir-fry sauce"
+      ]
+    },
+    "hidden_soy": {
+      "description": "Less obvious sources of soy in processed foods",
+      "triggers": [
+        "asian cuisine",
+        "chinese food",
+        "japanese food",
+        "korean food",
+        "thai food",
+        "vietnamese food",
+        "vegetarian meat substitutes",
+        "veggie burgers",
+        "protein bars",
+        "energy bars",
+        "some bread",
+        "some crackers",
+        "some cereals",
+        "some canned tuna",
+        "some chocolate",
+        "some peanut butter",
+        "some margarine",
+        "some mayonnaise",
+        "artificial bacon bits",
+        "imitation dairy products"
+      ]
+    }
+  },
+  "common_restaurant_triggers": [
+    "soy sauce",
+    "teriyaki",
+    "stir-fry",
+    "fried rice",
+    "lo mein",
+    "pad thai",
+    "edamame",
+    "miso soup",
+    "tofu",
+    "tempeh",
+    "asian dishes",
+    "vegetarian options",
+    "veggie burger",
+    "imitation crab",
+    "worcestershire sauce"
+  ],
+  "safe_alternatives": [
+    "coconut aminos (soy sauce substitute)",
+    "liquid aminos (if not soy-based)",
+    "fish sauce",
+    "worcestershire (soy-free)",
+    "olive oil",
+    "vegetable oil (not soybean)",
+    "canola oil",
+    "sunflower oil",
+    "almond milk",
+    "oat milk",
+    "rice milk",
+    "coconut milk",
+    "meats and fish (plain)",
+    "eggs",
+    "dairy products",
+    "beans and legumes (except soybeans)",
+    "fruits and vegetables"
+  ]
+}

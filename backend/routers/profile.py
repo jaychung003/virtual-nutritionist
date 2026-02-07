@@ -79,9 +79,9 @@ async def update_preferences(
     """
     # Validate protocol IDs (basic validation - could be more strict)
     valid_protocols = [
-        "low_fodmap", "gluten_free", "dairy_free", "nut_free",
-        "soy_free", "egg_free", "shellfish_free", "fish_free",
-        "pork_free", "red_meat_free", "vegan", "vegetarian",
+        "low_fodmap", "scd", "low_residue", "gluten_free", "dairy_free",
+        "nut_free", "peanut_free", "soy_free", "egg_free", "shellfish_free",
+        "fish_free", "pork_free", "red_meat_free", "vegan", "vegetarian",
         "paleo", "keto", "low_histamine"
     ]
 
