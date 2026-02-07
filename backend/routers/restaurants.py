@@ -279,6 +279,7 @@ async def get_restaurant_photo(
 async def analyze_restaurant_menu(
     place_id: str,
     protocols: List[str] = Query(..., description="Dietary protocols to check"),
+    debug: bool = Query(default=False, description="Return detailed debug info"),
     db: Session = Depends(get_db)
 ):
     """
@@ -355,13 +356,25 @@ async def analyze_restaurant_menu(
         raise HTTPException(status_code=404, detail="Restaurant not found on Google Places")
 
     # Download and filter menu photos
-    menu_photos = await MenuPhotoService.download_and_filter_menu_photos(
+    menu_photos, debug_info = await MenuPhotoService.download_and_filter_menu_photos(
         place_id,
         max_photos=10,
-        min_confidence=0.7
+        min_confidence=0.7,
+        return_debug_info=debug
     )
 
     if not menu_photos:
+        # If debug mode, return detailed debug info instead of error
+        if debug:
+            return {
+                "place_id": place_id,
+                "restaurant_name": details["name"],
+                "debug": True,
+                "menu_photos_found": 0,
+                "error": "No menu photos found",
+                **debug_info
+            }
+
         raise HTTPException(
             status_code=404,
             detail="No menu photos found. Restaurant may not have menu photos uploaded to Google Maps."
@@ -431,7 +444,7 @@ async def analyze_restaurant_menu(
 
     db.commit()
 
-    return {
+    response = {
         "restaurant": {
             "place_id": place_id,
             "name": details["name"],
@@ -443,3 +456,9 @@ async def analyze_restaurant_menu(
         "cached": False,
         "analyzed_at": dt.utcnow().isoformat()
     }
+
+    # Add debug info if requested
+    if debug and debug_info:
+        response["debug"] = debug_info
+
+    return response

@@ -95,8 +95,9 @@ Menu boards, printed menus, digital menus, and chalkboard menus ARE menus."""
     async def download_and_filter_menu_photos(
         place_id: str,
         max_photos: int = 10,
-        min_confidence: float = 0.7
-    ) -> List[Tuple[bytes, Dict]]:
+        min_confidence: float = 0.7,
+        return_debug_info: bool = False
+    ) -> Tuple[List[Tuple[bytes, Dict]], Optional[Dict]]:
         """
         Download photos from Google Places and filter for menu photos.
 
@@ -104,9 +105,12 @@ Menu boards, printed menus, digital menus, and chalkboard menus ARE menus."""
             place_id: Google Place ID
             max_photos: Maximum number of photos to check
             min_confidence: Minimum confidence threshold for menu detection
+            return_debug_info: If True, return debug information
 
         Returns:
-            List of tuples: (photo_bytes, detection_result)
+            Tuple of (menu_photos_list, debug_info_dict)
+            - menu_photos_list: List of tuples: (photo_bytes, detection_result)
+            - debug_info_dict: Debug information (only if return_debug_info=True)
         """
         logger.info(f"Downloading photos for place_id: {place_id}")
 
@@ -115,10 +119,18 @@ Menu boards, printed menus, digital menus, and chalkboard menus ARE menus."""
 
         if not details or not details.get("photos"):
             logger.warning(f"No photos found for place_id: {place_id}")
-            return []
+            debug_info = {
+                "total_photos_on_google": 0,
+                "photos_checked": 0,
+                "photo_check_results": [],
+                "menu_photos_found": 0,
+                "error": "No photos returned from Google Places API"
+            } if return_debug_info else None
+            return ([], debug_info)
 
         menu_photos = []
         photos_checked = 0
+        photo_check_results = [] if return_debug_info else None
 
         for photo in details["photos"][:max_photos]:
             photos_checked += 1
@@ -132,10 +144,28 @@ Menu boards, printed menus, digital menus, and chalkboard menus ARE menus."""
 
             if not photo_bytes:
                 logger.warning(f"Failed to download photo: {photo['photo_reference']}")
+                if return_debug_info:
+                    photo_check_results.append({
+                        "photo_number": photos_checked,
+                        "photo_reference": photo["photo_reference"],
+                        "download_success": False,
+                        "error": "Failed to download photo"
+                    })
                 continue
 
             # Check if it's a menu
             detection = await MenuPhotoService.is_menu_photo(photo_bytes)
+
+            if return_debug_info:
+                photo_check_results.append({
+                    "photo_number": photos_checked,
+                    "photo_reference": photo["photo_reference"],
+                    "download_success": True,
+                    "is_menu": detection["is_menu"],
+                    "confidence": detection["confidence"],
+                    "reason": detection["reason"],
+                    "accepted": detection["is_menu"] and detection["confidence"] >= min_confidence
+                })
 
             if detection["is_menu"] and detection["confidence"] >= min_confidence:
                 logger.info(f"✓ Menu found! Confidence: {detection['confidence']}")
@@ -149,7 +179,18 @@ Menu boards, printed menus, digital menus, and chalkboard menus ARE menus."""
                 logger.info(f"✗ Not a menu. Reason: {detection['reason']}")
 
         logger.info(f"Found {len(menu_photos)} menu photos out of {photos_checked} checked")
-        return menu_photos
+
+        debug_info = None
+        if return_debug_info:
+            debug_info = {
+                "total_photos_on_google": len(details.get("photos", [])),
+                "photos_checked": photos_checked,
+                "photo_check_results": photo_check_results,
+                "menu_photos_found": len(menu_photos),
+                "min_confidence_threshold": min_confidence
+            }
+
+        return (menu_photos, debug_info)
 
 
     @staticmethod
