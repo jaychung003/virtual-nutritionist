@@ -238,7 +238,7 @@ async def analyze_menu(
             scan_record = ScanHistory(
                 user_id=current_user.id,
                 protocols_used=request.protocols,
-                menu_items=[item.dict() for item in menu_items],
+                menu_items=menu_items,  # Already a list of dicts from vision service
                 restaurant_name=None  # Could be extracted from image or added to request
             )
             db.add(scan_record)
