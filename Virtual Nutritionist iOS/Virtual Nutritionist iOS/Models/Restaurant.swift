@@ -184,6 +184,13 @@ struct CachedMenuResponse: Codable {
     let menuItems: [CachedMenuItem]
     let metadata: MenuMetadata
     let message: String
+
+    enum CodingKeys: String, CodingKey {
+        case restaurant
+        case menuItems = "menu_items"
+        case metadata
+        case message
+    }
 }
 
 struct CachedMenuRestaurant: Codable {
