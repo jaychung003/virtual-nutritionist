@@ -42,6 +42,9 @@ struct ResultsView: View {
                     avoidCount: avoidCount
                 )
 
+                // AI Disclaimer Banner
+                AIDisclaimerBanner()
+
                 // Contribution message banner
                 if let message = contributionMessage {
                     HStack {
@@ -85,12 +88,43 @@ struct ResultsView: View {
     }
 }
 
+/// AI Disclaimer Banner
+struct AIDisclaimerBanner: View {
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundColor(.orange)
+                .font(.subheadline)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("AI-Powered Analysis")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+
+                Text("This app uses AI to infer ingredients in menu items. Results may not be 100% accurate. Always verify with restaurant staff before consuming, especially for severe allergies or dietary restrictions.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+        }
+        .padding()
+        .background(Color.orange.opacity(0.1))
+        .overlay(
+            Rectangle()
+                .frame(height: 1)
+                .foregroundColor(Color.orange.opacity(0.3)),
+            alignment: .bottom
+        )
+    }
+}
+
 /// Summary statistics header
 struct SummaryHeader: View {
     let safeCount: Int
     let cautionCount: Int
     let avoidCount: Int
-    
+
     var body: some View {
         HStack(spacing: 0) {
             SummaryItem(
