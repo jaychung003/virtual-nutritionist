@@ -3,28 +3,27 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var userProfile: UserProfile
     @EnvironmentObject var authViewModel: AuthViewModel
+    @State private var selectedTab = 1  // Default to Scan tab
 
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
+            ExploreView()
+                .tabItem {
+                    Label("Explore", systemImage: "magnifyingglass")
+                }
+                .tag(0)
+
             ScannerHomeView()
                 .tabItem {
                     Label("Scan", systemImage: "camera.fill")
                 }
-
-            ScanHistoryView()
-                .tabItem {
-                    Label("History", systemImage: "clock.arrow.circlepath")
-                }
-
-            BookmarksView()
-                .tabItem {
-                    Label("Bookmarks", systemImage: "bookmark.fill")
-                }
+                .tag(1)
 
             SettingsView()
                 .tabItem {
                     Label("Settings", systemImage: "gearshape.fill")
                 }
+                .tag(2)
         }
     }
 }
@@ -34,8 +33,11 @@ struct ScannerHomeView: View {
     @State private var showingCamera = false
     @State private var showingResults = false
     @State private var showingProfile = false
+    @State private var showingRestaurantSearch = false  // NEW
     @State private var capturedImage: UIImage?
+    @State private var selectedRestaurant: (placeId: String, name: String)?  // NEW
     @State private var analysisResults: [MenuItem] = []
+    @State private var contributionMessage: String?  // NEW
     @State private var isAnalyzing = false
     @State private var errorMessage: String?
 
@@ -138,12 +140,31 @@ struct ScannerHomeView: View {
             .sheet(isPresented: $showingProfile) {
                 ProfileView()
             }
+            .sheet(isPresented: $showingRestaurantSearch) {
+                RestaurantSearchSheet(
+                    onSelect: { placeId, name in
+                        selectedRestaurant = (placeId, name)
+                        if let image = capturedImage {
+                            analyzeWithRestaurant(image, placeId: placeId, name: name)
+                        }
+                    },
+                    onSkip: {
+                        if let image = capturedImage {
+                            analyzeAnonymously(image)
+                        }
+                    }
+                )
+            }
             .sheet(isPresented: $showingResults) {
-                ResultsView(menuItems: analysisResults)
+                ResultsView(
+                    menuItems: analysisResults,
+                    contributionMessage: contributionMessage
+                )
             }
             .onChange(of: capturedImage) { _, newImage in
                 if let image = newImage {
-                    analyzeImage(image)
+                    // Show restaurant search instead of analyzing immediately
+                    showingRestaurantSearch = true
                 }
             }
             .overlay {
@@ -161,17 +182,19 @@ struct ScannerHomeView: View {
         }
     }
     
-    private func analyzeImage(_ image: UIImage) {
+    // Anonymous scan (no restaurant linking)
+    private func analyzeAnonymously(_ image: UIImage) {
         isAnalyzing = true
         errorMessage = nil
-        
+        contributionMessage = nil
+
         Task {
             do {
                 let results = try await APIService.shared.analyzeMenu(
                     image: image,
                     protocols: userProfile.selectedProtocols
                 )
-                
+
                 await MainActor.run {
                     analysisResults = results
                     isAnalyzing = false
@@ -182,6 +205,38 @@ struct ScannerHomeView: View {
                 await MainActor.run {
                     isAnalyzing = false
                     capturedImage = nil
+                    errorMessage = error.localizedDescription
+                }
+            }
+        }
+    }
+
+    // Community contribution (linked to restaurant)
+    private func analyzeWithRestaurant(_ image: UIImage, placeId: String, name: String) {
+        isAnalyzing = true
+        errorMessage = nil
+
+        Task {
+            do {
+                let response = try await APIService.shared.analyzeRestaurantMenu(
+                    placeId: placeId,
+                    image: image,
+                    protocols: userProfile.selectedProtocols
+                )
+
+                await MainActor.run {
+                    analysisResults = response.menuItems
+                    contributionMessage = "✅ Analysis saved! Other users can now see \(name) has menu data."
+                    isAnalyzing = false
+                    capturedImage = nil
+                    selectedRestaurant = nil
+                    showingResults = true
+                }
+            } catch {
+                await MainActor.run {
+                    isAnalyzing = false
+                    capturedImage = nil
+                    selectedRestaurant = nil
                     errorMessage = error.localizedDescription
                 }
             }
@@ -322,6 +377,17 @@ struct SettingsView: View {
                         }
                     }
                     .foregroundColor(.primary)
+                }
+
+                // My Data section
+                Section(header: Text("My Data")) {
+                    NavigationLink(destination: ScanHistoryView()) {
+                        Label("Scan History", systemImage: "clock.arrow.circlepath")
+                    }
+
+                    NavigationLink(destination: BookmarksView()) {
+                        Label("Bookmarks", systemImage: "bookmark.fill")
+                    }
                 }
 
                 // Account actions

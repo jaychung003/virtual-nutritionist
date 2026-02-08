@@ -4,7 +4,8 @@ import SwiftUI
 struct ResultsView: View {
     @Environment(\.dismiss) private var dismiss
     let menuItems: [MenuItem]
-    
+    let contributionMessage: String?  // NEW
+
     @State private var selectedFilter: SafetyFilter = .all
     
     enum SafetyFilter: String, CaseIterable {
@@ -40,7 +41,19 @@ struct ResultsView: View {
                     cautionCount: cautionCount,
                     avoidCount: avoidCount
                 )
-                
+
+                // Contribution message banner
+                if let message = contributionMessage {
+                    HStack {
+                        Text(message)
+                            .font(.subheadline)
+                            .foregroundColor(.white)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.green)
+                }
+
                 // Filter tabs
                 FilterTabs(selectedFilter: $selectedFilter)
                 

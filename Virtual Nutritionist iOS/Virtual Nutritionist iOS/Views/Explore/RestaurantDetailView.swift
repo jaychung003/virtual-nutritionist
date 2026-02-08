@@ -13,7 +13,13 @@ struct RestaurantDetailView: View {
     @StateObject private var viewModel = RestaurantDetailViewModel()
     @State private var showingCachedMenu = false
     @State private var showingCamera = false
+    @State private var capturedImage: UIImage?
+    @State private var isAnalyzing = false
+    @State private var analysisResults: [MenuItem] = []
+    @State private var showingResults = false
+    @State private var errorMessage: String?
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var userProfile: UserProfile
 
     var body: some View {
         NavigationView {
@@ -209,14 +215,63 @@ struct RestaurantDetailView: View {
                     CachedMenuView(placeId: restaurant.placeId, restaurantName: restaurant.name)
                 }
             }
-            .fullScreenCover(isPresented: $showingCamera) {
-                if let restaurant = viewModel.restaurant {
-                    CameraView(linkedRestaurant: (restaurant.placeId, restaurant.name))
+            .sheet(isPresented: $showingCamera) {
+                CameraView(capturedImage: $capturedImage)
+            }
+            .sheet(isPresented: $showingResults) {
+                ResultsView(
+                    menuItems: analysisResults,
+                    contributionMessage: "✅ Analysis saved to community for \(viewModel.restaurant?.name ?? "this restaurant")!"
+                )
+            }
+            .onChange(of: capturedImage) { _, newImage in
+                if let image = newImage, let restaurant = viewModel.restaurant {
+                    analyzeForRestaurant(image: image, placeId: restaurant.placeId)
                 }
+            }
+            .overlay {
+                if isAnalyzing {
+                    AnalyzingOverlay()
+                }
+            }
+            .alert("Error", isPresented: .constant(errorMessage != nil)) {
+                Button("OK") {
+                    errorMessage = nil
+                }
+            } message: {
+                Text(errorMessage ?? "")
             }
         }
         .task {
             await viewModel.loadDetails(placeId: placeId)
+        }
+    }
+
+    private func analyzeForRestaurant(image: UIImage, placeId: String) {
+        isAnalyzing = true
+        errorMessage = nil
+
+        Task {
+            do {
+                let response = try await APIService.shared.analyzeRestaurantMenu(
+                    placeId: placeId,
+                    image: image,
+                    protocols: userProfile.selectedProtocols
+                )
+
+                await MainActor.run {
+                    analysisResults = response.menuItems
+                    isAnalyzing = false
+                    capturedImage = nil
+                    showingResults = true
+                }
+            } catch {
+                await MainActor.run {
+                    isAnalyzing = false
+                    capturedImage = nil
+                    errorMessage = error.localizedDescription
+                }
+            }
         }
     }
 }
