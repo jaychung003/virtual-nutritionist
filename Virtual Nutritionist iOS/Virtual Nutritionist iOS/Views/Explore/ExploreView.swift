@@ -11,6 +11,7 @@ struct ExploreView: View {
     @StateObject private var viewModel = ExploreViewModel()
     @State private var selectedRestaurant: RestaurantNearbyResult?
     @State private var showingDetail = false
+    @State private var hasAppeared = false  // Prevent auto-load on tab init
 
     var body: some View {
         NavigationView {
@@ -79,6 +80,9 @@ struct ExploreView: View {
             .navigationTitle("Explore")
             .sheet(item: $selectedRestaurant) { restaurant in
                 RestaurantDetailView(placeId: restaurant.placeId)
+            }
+            .onAppear {
+                hasAppeared = true
             }
         }
     }

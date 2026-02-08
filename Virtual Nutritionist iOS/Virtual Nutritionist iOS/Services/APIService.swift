@@ -38,6 +38,7 @@ class APIService {
 
         var request = URLRequest(url: requestURL)
         request.httpMethod = method
+        request.timeoutInterval = 30  // Increase timeout for slow backend
 
         // Add headers
         for (key, value) in getAuthHeaders() {
