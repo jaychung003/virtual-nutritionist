@@ -3,27 +3,41 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var userProfile: UserProfile
     @EnvironmentObject var authViewModel: AuthViewModel
-    @State private var selectedTab = 1  // Default to Scan tab
+    @State private var selectedTab = 0  // Default to first tab (Scan)
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            ExploreView()
-                .tabItem {
-                    Label("Explore", systemImage: "magnifyingglass")
-                }
-                .tag(0)
+            if FeatureFlags.exploreEnabled {
+                ExploreView()
+                    .tabItem {
+                        Label("Explore", systemImage: "magnifyingglass")
+                    }
+                    .tag(0)
 
-            ScannerHomeView()
-                .tabItem {
-                    Label("Scan", systemImage: "camera.fill")
-                }
-                .tag(1)
+                ScannerHomeView()
+                    .tabItem {
+                        Label("Scan", systemImage: "camera.fill")
+                    }
+                    .tag(1)
 
-            SettingsView()
-                .tabItem {
-                    Label("Settings", systemImage: "gearshape.fill")
-                }
-                .tag(2)
+                SettingsView()
+                    .tabItem {
+                        Label("Settings", systemImage: "gearshape.fill")
+                    }
+                    .tag(2)
+            } else {
+                ScannerHomeView()
+                    .tabItem {
+                        Label("Scan", systemImage: "camera.fill")
+                    }
+                    .tag(0)
+
+                SettingsView()
+                    .tabItem {
+                        Label("Settings", systemImage: "gearshape.fill")
+                    }
+                    .tag(1)
+            }
         }
     }
 }
@@ -163,8 +177,13 @@ struct ScannerHomeView: View {
             }
             .onChange(of: capturedImage) { _, newImage in
                 if let image = newImage {
-                    // Show restaurant search instead of analyzing immediately
-                    showingRestaurantSearch = true
+                    if FeatureFlags.exploreEnabled {
+                        // Show restaurant search for community contribution
+                        showingRestaurantSearch = true
+                    } else {
+                        // Analyze directly without restaurant linking
+                        analyzeAnonymously(image)
+                    }
                 }
             }
             .overlay {
