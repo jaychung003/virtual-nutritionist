@@ -164,8 +164,28 @@ class CachedMenuViewModel: ObservableObject {
 
         do {
             menuData = try await apiService.getCachedMenu(placeId: placeId, protocols: protocols)
+        } catch let decodingError as DecodingError {
+            // More detailed error for debugging
+            switch decodingError {
+            case .keyNotFound(let key, let context):
+                errorMessage = "Missing field: \(key.stringValue) at \(context.codingPath.map(\.stringValue).joined(separator: "."))"
+                print("🔴 Decoding Error - Missing key: \(key.stringValue)")
+                print("   Context: \(context.debugDescription)")
+            case .typeMismatch(let type, let context):
+                errorMessage = "Type mismatch for \(type) at \(context.codingPath.map(\.stringValue).joined(separator: "."))"
+                print("🔴 Decoding Error - Type mismatch: \(type)")
+            case .valueNotFound(let type, let context):
+                errorMessage = "Missing value for \(type) at \(context.codingPath.map(\.stringValue).joined(separator: "."))"
+                print("🔴 Decoding Error - Value not found: \(type)")
+            case .dataCorrupted(let context):
+                errorMessage = "Data corrupted: \(context.debugDescription)"
+                print("🔴 Decoding Error - Data corrupted")
+            @unknown default:
+                errorMessage = decodingError.localizedDescription
+            }
         } catch {
             errorMessage = error.localizedDescription
+            print("🔴 Error loading menu: \(error)")
         }
 
         isLoading = false

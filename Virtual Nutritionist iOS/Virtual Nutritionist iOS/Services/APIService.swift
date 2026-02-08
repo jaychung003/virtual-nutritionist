@@ -12,6 +12,40 @@ class APIService {
 
     private init() {}
 
+    // MARK: - Date Decoding Helper
+
+    /// Custom date decoder that handles ISO8601 with fractional seconds and timezone variations
+    private static func customDateDecoder() -> JSONDecoder.DateDecodingStrategy {
+        return .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let dateString = try container.decode(String.self)
+
+            // Try ISO8601 with fractional seconds
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let date = formatter.date(from: dateString) {
+                return date
+            }
+
+            // Try standard ISO8601
+            formatter.formatOptions = [.withInternetDateTime]
+            if let date = formatter.date(from: dateString) {
+                return date
+            }
+
+            // Try DateFormatter for edge cases
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ"
+            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+            if let date = dateFormatter.date(from: dateString) {
+                return date
+            }
+
+            print("⚠️ Failed to decode date: \(dateString)")
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date: \(dateString)")
+        }
+    }
+
     // MARK: - Private Helpers
 
     private func getAuthHeaders() -> [String: String] {
@@ -219,23 +253,7 @@ class APIService {
 
         // Configure JSON decoder with date decoding (handle fractional seconds)
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .custom { decoder in
-            let container = try decoder.singleValueContainer()
-            let dateString = try container.decode(String.self)
-
-            let formatter = ISO8601DateFormatter()
-            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-            if let date = formatter.date(from: dateString) {
-                return date
-            }
-
-            formatter.formatOptions = [.withInternetDateTime]
-            if let date = formatter.date(from: dateString) {
-                return date
-            }
-
-            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date: \(dateString)")
-        }
+        decoder.dateDecodingStrategy = APIService.customDateDecoder()
 
         guard let url = URL(string: urlString) else {
             throw APIError.invalidURL
@@ -323,23 +341,7 @@ class APIService {
         }
 
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .custom { decoder in
-            let container = try decoder.singleValueContainer()
-            let dateString = try container.decode(String.self)
-
-            let formatter = ISO8601DateFormatter()
-            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-            if let date = formatter.date(from: dateString) {
-                return date
-            }
-
-            formatter.formatOptions = [.withInternetDateTime]
-            if let date = formatter.date(from: dateString) {
-                return date
-            }
-
-            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date: \(dateString)")
-        }
+        decoder.dateDecodingStrategy = APIService.customDateDecoder()
 
         guard let url = URL(string: urlString) else {
             throw APIError.invalidURL
