@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(curl:*)",
+      "Bash(tee:*)",
+      "Bash(python:*)",
+      "Bash(alembic revision:*)",
+      "Bash(python3:*)",
+      "Bash(URL='https://virtual-nutritionist-1upi.onrender.com/restaurants/ChIJ_dQjyK-AhYARBc9DFlxcclg/analyze?protocols=vegan' echo \"🔍 Analyzing Nopa''''s menu with VEGAN protocol...\" echo \"This may take 30-60 seconds...\" curl -X POST \"$URL\" -H \"Content-Type: application/json\" --max-time 180 -s)",
+      "Bash(URL='https://virtual-nutritionist-1upi.onrender.com/restaurants/ChIJ_dQjyK-AhYARBc9DFlxcclg/analyze?protocols=vegan' echo \"🔍 Analyzing Nopa''''s menu with VEGAN protocol...\" curl -X POST \"$URL\" -H \"Content-Type: application/json\" --max-time 180 -o /tmp/nopa_analysis.json echo \"\" echo \"Response saved. Checking what we got:\" cat /tmp/nopa_analysis.json)",
+      "Bash(__NEW_LINE_05ff56dceaa474b1__ echo \"Analysis complete. Result:\")"
+    ]
+  }
+}

@@ -183,6 +183,191 @@ class APIService {
         }
     }
 
+    // MARK: - Restaurant Discovery
+
+    /// Search for restaurants by name
+    func searchRestaurants(query: String, location: String? = nil) async throws -> [RestaurantSearchResult] {
+        var urlString = "\(baseURL)/restaurants/search?query=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+        if let location = location {
+            urlString += "&location=\(location.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+        }
+
+        return try await performRequest(
+            url: urlString,
+            responseType: [RestaurantSearchResult].self
+        )
+    }
+
+    /// Get nearby restaurants
+    func getNearbyRestaurants(
+        latitude: Double,
+        longitude: Double,
+        radiusMeters: Int = 5000,
+        cuisineType: String? = nil,
+        protocols: [String] = []
+    ) async throws -> [RestaurantNearbyResult] {
+        var urlString = "\(baseURL)/restaurants/nearby?latitude=\(latitude)&longitude=\(longitude)&radius_meters=\(radiusMeters)"
+
+        if let cuisine = cuisineType {
+            urlString += "&cuisine_type=\(cuisine.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+        }
+
+        for protocol in protocols {
+            urlString += "&protocols=\(protocol)"
+        }
+
+        // Configure JSON decoder with date decoding
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        guard let url = URL(string: urlString) else {
+            throw APIError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+
+        for (key, value) in getAuthHeaders() {
+            request.setValue(value, forHTTPHeaderField: key)
+        }
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let errorResponse = try? decoder.decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(errorResponse.detail)
+            }
+            throw APIError.httpError(httpResponse.statusCode)
+        }
+
+        return try decoder.decode([RestaurantNearbyResult].self, from: data)
+    }
+
+    /// Get restaurant details
+    func getRestaurantDetails(placeId: String) async throws -> RestaurantDetail {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        guard let url = URL(string: "\(baseURL)/restaurants/\(placeId)/details") else {
+            throw APIError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+
+        for (key, value) in getAuthHeaders() {
+            request.setValue(value, forHTTPHeaderField: key)
+        }
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let errorResponse = try? decoder.decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(errorResponse.detail)
+            }
+            throw APIError.httpError(httpResponse.statusCode)
+        }
+
+        return try decoder.decode(RestaurantDetail.self, from: data)
+    }
+
+    /// Get cached menu analysis for a restaurant
+    func getCachedMenu(placeId: String, protocols: [String] = []) async throws -> CachedMenuResponse {
+        var urlString = "\(baseURL)/restaurants/\(placeId)/menu"
+
+        if !protocols.isEmpty {
+            urlString += "?protocols=" + protocols.joined(separator: "&protocols=")
+        }
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        guard let url = URL(string: urlString) else {
+            throw APIError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+
+        for (key, value) in getAuthHeaders() {
+            request.setValue(value, forHTTPHeaderField: key)
+        }
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let errorResponse = try? decoder.decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(errorResponse.detail)
+            }
+            throw APIError.httpError(httpResponse.statusCode)
+        }
+
+        return try decoder.decode(CachedMenuResponse.self, from: data)
+    }
+
+    /// Analyze restaurant menu with community contribution
+    func analyzeRestaurantMenu(
+        placeId: String,
+        image: UIImage,
+        protocols: [String]
+    ) async throws -> AnalyzeMenuResponse {
+        // Prepare image
+        let resizedImage = CameraService.shared.resizeImage(image, maxDimension: 1920)
+        guard let imageData = CameraService.shared.compressImage(resizedImage, maxSizeKB: 2048) else {
+            throw APIError.imageProcessingFailed
+        }
+
+        let base64Image = imageData.base64EncodedString()
+
+        // Build request
+        guard let url = URL(string: "\(baseURL)/restaurants/\(placeId)/analyze") else {
+            throw APIError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 60
+
+        for (key, value) in getAuthHeaders() {
+            request.setValue(value, forHTTPHeaderField: key)
+        }
+
+        struct AnalyzeRestaurantRequest: Encodable {
+            let image: String
+            let protocols: [String]
+        }
+
+        let requestBody = AnalyzeRestaurantRequest(image: base64Image, protocols: protocols)
+        request.httpBody = try JSONEncoder().encode(requestBody)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(errorResponse.detail)
+            }
+            throw APIError.httpError(httpResponse.statusCode)
+        }
+
+        return try JSONDecoder().decode(AnalyzeMenuResponse.self, from: data)
+    }
+
     // MARK: - Profile & Preferences
 
     func getProfile() async throws -> ProfileResponse {
