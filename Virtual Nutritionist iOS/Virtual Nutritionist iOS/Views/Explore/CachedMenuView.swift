@@ -6,12 +6,14 @@
 //
 
 import SwiftUI
+import Combine
 
 struct CachedMenuView: View {
     let placeId: String
     let restaurantName: String
 
     @StateObject private var viewModel = CachedMenuViewModel()
+    @EnvironmentObject var userProfile: UserProfile
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -22,7 +24,7 @@ struct CachedMenuView: View {
                 } else if let error = viewModel.errorMessage {
                     ErrorView(message: error, retryAction: {
                         Task {
-                            await viewModel.loadMenu(placeId: placeId)
+                            await viewModel.loadMenu(placeId: placeId, protocols: userProfile.selectedProtocols)
                         }
                     })
                 } else if let menuData = viewModel.menuData {
@@ -43,8 +45,9 @@ struct CachedMenuView: View {
                                     Spacer()
                                 }
 
-                                if let protocols = UserProfile.shared.selectedProtocols.map({ $0.name }).joined(separator: ", "), !protocols.isEmpty {
-                                    Text("Showing all items for: \(protocols)")
+                                if !userProfile.selectedProtocols.isEmpty {
+                                    let protocolNames = userProfile.selectedProtocols.joined(separator: ", ")
+                                    Text("Showing all items for: \(protocolNames)")
                                         .font(.caption)
                                         .foregroundColor(.gray)
                                 }
@@ -61,7 +64,7 @@ struct CachedMenuView: View {
                             // Menu items
                             VStack(alignment: .leading, spacing: 12) {
                                 ForEach(menuData.menuItems) { item in
-                                    MenuItemCard(item: item)
+                                    CachedMenuItemCard(item: item)
                                 }
                             }
                             .padding(.horizontal)
@@ -107,14 +110,14 @@ struct CachedMenuView: View {
             }
         }
         .task {
-            await viewModel.loadMenu(placeId: placeId)
+            await viewModel.loadMenu(placeId: placeId, protocols: userProfile.selectedProtocols)
         }
     }
 }
 
 // MARK: - Menu Item Card
 
-struct MenuItemCard: View {
+struct CachedMenuItemCard: View {
     let item: CachedMenuItem
 
     var body: some View {
@@ -155,12 +158,11 @@ class CachedMenuViewModel: ObservableObject {
 
     private let apiService = APIService.shared
 
-    func loadMenu(placeId: String) async {
+    func loadMenu(placeId: String, protocols: [String]) async {
         isLoading = true
         errorMessage = nil
 
         do {
-            let protocols = UserProfile.shared.selectedProtocols.map { $0.id }
             menuData = try await apiService.getCachedMenu(placeId: placeId, protocols: protocols)
         } catch {
             errorMessage = error.localizedDescription

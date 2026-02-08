@@ -438,5 +438,5 @@ struct EmptyResultsView: View {
             triggers: ["possible onion", "dressing may contain garlic"],
             notes: "Ask for plain olive oil and lemon instead of dressing."
         )
-    ])
+    ], contributionMessage: nil)
 }

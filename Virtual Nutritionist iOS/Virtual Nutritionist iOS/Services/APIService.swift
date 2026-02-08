@@ -213,13 +213,29 @@ class APIService {
             urlString += "&cuisine_type=\(cuisine.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
         }
 
-        for protocol in protocols {
-            urlString += "&protocols=\(protocol)"
+        for dietaryProtocol in protocols {
+            urlString += "&protocols=\(dietaryProtocol)"
         }
 
-        // Configure JSON decoder with date decoding
+        // Configure JSON decoder with date decoding (handle fractional seconds)
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let dateString = try container.decode(String.self)
+
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let date = formatter.date(from: dateString) {
+                return date
+            }
+
+            formatter.formatOptions = [.withInternetDateTime]
+            if let date = formatter.date(from: dateString) {
+                return date
+            }
+
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date: \(dateString)")
+        }
 
         guard let url = URL(string: urlString) else {
             throw APIError.invalidURL
@@ -251,7 +267,25 @@ class APIService {
     /// Get restaurant details
     func getRestaurantDetails(placeId: String) async throws -> RestaurantDetail {
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let dateString = try container.decode(String.self)
+
+            // Try ISO8601 with fractional seconds first
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let date = formatter.date(from: dateString) {
+                return date
+            }
+
+            // Fallback to standard ISO8601
+            formatter.formatOptions = [.withInternetDateTime]
+            if let date = formatter.date(from: dateString) {
+                return date
+            }
+
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date: \(dateString)")
+        }
 
         guard let url = URL(string: "\(baseURL)/restaurants/\(placeId)/details") else {
             throw APIError.invalidURL
@@ -289,7 +323,23 @@ class APIService {
         }
 
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let dateString = try container.decode(String.self)
+
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let date = formatter.date(from: dateString) {
+                return date
+            }
+
+            formatter.formatOptions = [.withInternetDateTime]
+            if let date = formatter.date(from: dateString) {
+                return date
+            }
+
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date: \(dateString)")
+        }
 
         guard let url = URL(string: urlString) else {
             throw APIError.invalidURL

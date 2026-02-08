@@ -23,8 +23,10 @@ class ExploreViewModel: NSObject, ObservableObject {
     private let apiService = APIService.shared
     private let locationManager = CLLocationManager()
     private var cancellables = Set<AnyCancellable>()
+    private weak var userProfile: UserProfile?
 
-    override init() {
+    init(userProfile: UserProfile? = nil) {
+        self.userProfile = userProfile
         super.init()
         locationManager.delegate = self
 
@@ -111,7 +113,7 @@ class ExploreViewModel: NSObject, ObservableObject {
 
         do {
             // Get user's active protocols for filtering
-            let protocols = UserProfile.shared.selectedProtocols.map { $0.id }
+            let protocols = userProfile?.selectedProtocols ?? []
 
             restaurants = try await apiService.getNearbyRestaurants(
                 latitude: location.latitude,
