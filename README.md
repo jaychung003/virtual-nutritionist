@@ -390,7 +390,3 @@ This is a personal project, but contributions are welcome! Areas of interest:
 - Built with [Anthropic Claude](https://www.anthropic.com/claude) Vision API
 - Restaurant data from [Google Places API](https://developers.google.com/maps/documentation/places)
 - Inspired by the IBD and food allergy communities
-
-## License
-
-MIT License
