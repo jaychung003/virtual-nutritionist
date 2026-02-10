@@ -64,7 +64,7 @@ struct ScannerHomeView: View {
                         .font(.system(size: 80))
                         .foregroundStyle(.green)
                     
-                    Text("Menu Scanner")
+                    Text("Diet Watch")
                         .font(.largeTitle)
                         .fontWeight(.bold)
                     

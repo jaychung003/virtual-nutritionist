@@ -32,7 +32,7 @@ struct AuthContainerView: View {
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
             }
-            .navigationTitle("Virtual Nutritionist")
+            .navigationTitle("Diet Watch")
             .navigationBarTitleDisplayMode(.inline)
         }
     }
