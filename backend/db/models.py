@@ -51,6 +51,7 @@ class ScanHistory(Base):
     protocols_used = Column(ARRAY(Text), nullable=False)
     menu_items = Column(JSONB, nullable=False)  # Stores array of menu items with analysis
     restaurant_name = Column(String(255), nullable=True)  # Optional restaurant name
+    image_data = Column(Text, nullable=True)  # Base64 encoded image of the scanned menu
     scanned_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
 
     # Relationships

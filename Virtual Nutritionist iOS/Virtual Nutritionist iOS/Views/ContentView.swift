@@ -20,11 +20,17 @@ struct ContentView: View {
                     }
                     .tag(1)
 
+                ScanHistoryView()
+                    .tabItem {
+                        Label("History", systemImage: "clock.arrow.circlepath")
+                    }
+                    .tag(2)
+
                 SettingsView()
                     .tabItem {
                         Label("Settings", systemImage: "gearshape.fill")
                     }
-                    .tag(2)
+                    .tag(3)
             } else {
                 ScannerHomeView()
                     .tabItem {
@@ -32,11 +38,17 @@ struct ContentView: View {
                     }
                     .tag(0)
 
+                ScanHistoryView()
+                    .tabItem {
+                        Label("History", systemImage: "clock.arrow.circlepath")
+                    }
+                    .tag(1)
+
                 SettingsView()
                     .tabItem {
                         Label("Settings", systemImage: "gearshape.fill")
                     }
-                    .tag(1)
+                    .tag(2)
             }
         }
     }
@@ -400,10 +412,6 @@ struct SettingsView: View {
 
                 // My Data section
                 Section(header: Text("My Data")) {
-                    NavigationLink(destination: ScanHistoryView()) {
-                        Label("Scan History", systemImage: "clock.arrow.circlepath")
-                    }
-
                     NavigationLink(destination: BookmarksView()) {
                         Label("Bookmarks", systemImage: "bookmark.fill")
                     }

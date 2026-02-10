@@ -119,39 +119,57 @@ struct ScanHistoryRow: View {
     let scan: ScanItem
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(scan.restaurantName ?? "Menu Scan")
-                    .font(.headline)
-
-                Spacer()
-
-                Text("\(scan.itemCount) items")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.secondary.opacity(0.1))
-                    .cornerRadius(8)
+        HStack(spacing: 12) {
+            // Left side: Date icon
+            VStack {
+                Image(systemName: "calendar.circle.fill")
+                    .font(.system(size: 40))
+                    .foregroundColor(.green)
             }
 
-            HStack {
-                ForEach(scan.protocolsUsed, id: \.self) { dietaryProtocol in
-                    Text(protocolDisplayName(dietaryProtocol))
-                        .font(.caption2)
-                        .foregroundColor(.blue)
+            // Right side: Content
+            VStack(alignment: .leading, spacing: 6) {
+                // Primary: Date and time
+                Text(scan.detailedDateTime)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+
+                // Secondary: Restaurant name and item count
+                HStack(spacing: 8) {
+                    if let restaurantName = scan.restaurantName {
+                        Text(restaurantName)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Text("\(scan.itemCount) items")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(Color.blue.opacity(0.1))
+                        .background(Color.secondary.opacity(0.1))
                         .cornerRadius(4)
+                }
+
+                // Protocols
+                if !scan.protocolsUsed.isEmpty {
+                    HStack(spacing: 4) {
+                        ForEach(scan.protocolsUsed, id: \.self) { dietaryProtocol in
+                            Text(protocolDisplayName(dietaryProtocol))
+                                .font(.caption2)
+                                .foregroundColor(.blue)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.blue.opacity(0.1))
+                                .cornerRadius(4)
+                        }
+                    }
                 }
             }
 
-            Text(scan.formattedDate)
-                .font(.caption)
-                .foregroundColor(.secondary)
+            Spacer()
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 8)
     }
 
     private func protocolDisplayName(_ id: String) -> String {

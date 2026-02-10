@@ -33,6 +33,7 @@ class ScanDetailResponse(BaseModel):
     protocols_used: List[str]
     menu_items: List[dict]  # Full menu items with analysis
     restaurant_name: Optional[str]
+    image_data: Optional[str]  # Base64 encoded image
     scanned_at: str
 
 
@@ -112,6 +113,7 @@ async def get_scan(
         protocols_used=scan.protocols_used,
         menu_items=scan.menu_items or [],
         restaurant_name=scan.restaurant_name,
+        image_data=scan.image_data,
         scanned_at=scan.scanned_at.isoformat()
     )
 

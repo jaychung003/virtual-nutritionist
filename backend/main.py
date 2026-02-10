@@ -240,7 +240,8 @@ async def analyze_menu(
                 user_id=current_user.id,
                 protocols_used=request.protocols,
                 menu_items=menu_items,  # Already a list of dicts from vision service
-                restaurant_name=None  # Could be extracted from image or added to request
+                restaurant_name=None,  # Could be extracted from image or added to request
+                image_data=request.image  # Save the base64 encoded image
             )
             db.add(scan_record)
             db.commit()
