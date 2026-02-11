@@ -120,11 +120,29 @@ struct ScanHistoryRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // Left side: Date icon
-            VStack {
-                Image(systemName: "calendar.circle.fill")
-                    .font(.system(size: 40))
-                    .foregroundColor(.green)
+            // Left side: Image thumbnail or icon
+            if let imageData = scan.imageData,
+               let data = Data(base64Encoded: imageData),
+               let uiImage = UIImage(data: data) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 60, height: 60)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+            } else {
+                // Fallback icon if no image
+                VStack {
+                    Image(systemName: "doc.text.image")
+                        .font(.system(size: 30))
+                        .foregroundColor(.gray)
+                }
+                .frame(width: 60, height: 60)
+                .background(Color.gray.opacity(0.1))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
             }
 
             // Right side: Content

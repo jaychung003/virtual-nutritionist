@@ -18,6 +18,7 @@ class ScanItem(BaseModel):
     protocols_used: List[str]
     restaurant_name: Optional[str]
     item_count: int
+    image_data: Optional[str]  # Base64 encoded image thumbnail
     scanned_at: str
 
 
@@ -74,6 +75,7 @@ async def list_scans(
             protocols_used=scan.protocols_used,
             restaurant_name=scan.restaurant_name,
             item_count=len(scan.menu_items) if scan.menu_items else 0,
+            image_data=scan.image_data,
             scanned_at=scan.scanned_at.isoformat()
         ))
 

@@ -12,6 +12,7 @@ struct ScanItem: Codable, Identifiable, Hashable {
     let protocolsUsed: [String]
     let restaurantName: String?
     let itemCount: Int
+    let imageData: String?
     let scannedAt: String
 
     enum CodingKeys: String, CodingKey {
@@ -19,6 +20,7 @@ struct ScanItem: Codable, Identifiable, Hashable {
         case protocolsUsed = "protocols_used"
         case restaurantName = "restaurant_name"
         case itemCount = "item_count"
+        case imageData = "image_data"
         case scannedAt = "scanned_at"
     }
 
