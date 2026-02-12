@@ -28,7 +28,8 @@
       "Bash(pg_ctl status:*)",
       "Bash(brew services start:*)",
       "Bash(grep:*)",
-      "Bash(git -C \"/Users/jaychung/Virtual Nutritionist\" branch -a)"
+      "Bash(git -C \"/Users/jaychung/Virtual Nutritionist\" branch -a)",
+      "Bash(git rm:*)"
     ]
   }
 }

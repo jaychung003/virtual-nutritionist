@@ -11,11 +11,6 @@ import Combine
 
 @MainActor
 class ExploreViewModel: NSObject, ObservableObject {
-    enum ViewMode {
-        case list
-        case map
-    }
-
     @Published var searchQuery = ""
     @Published var restaurants: [RestaurantNearbyResult] = []
     @Published var isLoading = false
@@ -26,8 +21,12 @@ class ExploreViewModel: NSObject, ObservableObject {
     @Published var locationPermissionDenied = false
 
     // Map-specific properties
-    @Published var viewMode: ViewMode = .list
     @Published var selectedMapRestaurant: RestaurantNearbyResult?
+    @Published var showRedoSearchButton = false
+
+    // Track original search location to detect map movement
+    var lastSearchCenter: CLLocationCoordinate2D?
+    var currentMapCenter: CLLocationCoordinate2D?
 
     private let apiService = APIService.shared
     private let locationManager = CLLocationManager()
@@ -48,9 +47,19 @@ class ExploreViewModel: NSObject, ObservableObject {
                     Task {
                         await self?.performSearch(query: query)
                     }
+                } else {
+                    // When search is cleared, search nearby if we have location
+                    if let location = self?.userLocation {
+                        Task {
+                            await self?.searchNearby()
+                        }
+                    }
                 }
             }
             .store(in: &cancellables)
+
+        // Auto-request location on init
+        requestLocation()
     }
 
     // MARK: - Location
@@ -117,24 +126,61 @@ class ExploreViewModel: NSObject, ObservableObject {
             return
         }
 
+        await searchNearby(center: location)
+    }
+
+    func searchNearby(center: CLLocationCoordinate2D) async {
         isLoading = true
         errorMessage = nil
+        showRedoSearchButton = false
 
         do {
             // Get user's active protocols for filtering
             let protocols = userProfile?.selectedProtocols ?? []
 
             restaurants = try await apiService.getNearbyRestaurants(
-                latitude: location.latitude,
-                longitude: location.longitude,
+                latitude: center.latitude,
+                longitude: center.longitude,
                 radiusMeters: 1609,  // 1 mile radius (already sorted by distance)
                 protocols: protocols
             )
+
+            // Track this search center
+            lastSearchCenter = center
         } catch {
             errorMessage = "Failed to load nearby restaurants: \(error.localizedDescription)"
         }
 
         isLoading = false
+    }
+
+    // Called when map camera moves significantly
+    func onMapCameraMoved(newCenter: CLLocationCoordinate2D) {
+        // Store current map center
+        currentMapCenter = newCenter
+
+        // Check if moved significantly from last search center
+        guard let lastCenter = lastSearchCenter else { return }
+
+        let distance = calculateDistance(
+            from: lastCenter,
+            to: newCenter
+        )
+
+        // Show redo button if moved more than 500 meters (~0.3 miles)
+        showRedoSearchButton = distance > 500
+    }
+
+    func redoSearchInArea(center: CLLocationCoordinate2D) {
+        Task {
+            await searchNearby(center: center)
+        }
+    }
+
+    private func calculateDistance(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D) -> Double {
+        let location1 = CLLocation(latitude: from.latitude, longitude: from.longitude)
+        let location2 = CLLocation(latitude: to.latitude, longitude: to.longitude)
+        return location1.distance(from: location2)
     }
 
     // MARK: - Restaurant Details

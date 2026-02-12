@@ -13,6 +13,9 @@ struct RestaurantMapView: UIViewRepresentable {
     let restaurants: [RestaurantNearbyResult]
     let userLocation: CLLocationCoordinate2D?
     @Binding var selectedRestaurant: RestaurantNearbyResult?
+    let showRedoButton: Bool
+    let onCameraMove: (CLLocationCoordinate2D) -> Void
+    let onRedoSearch: (CLLocationCoordinate2D) -> Void
 
     func makeUIView(context: Context) -> GMSMapView {
         let camera: GMSCameraPosition
@@ -115,6 +118,39 @@ struct RestaurantMapView: UIViewRepresentable {
         func mapView(_ mapView: GMSMapView, didTapAt coordinate: CLLocationCoordinate2D) {
             // Deselect when tapping empty space
             parent.selectedRestaurant = nil
+        }
+
+        func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
+            // Called when camera movement ends
+            let center = CLLocationCoordinate2D(
+                latitude: position.target.latitude,
+                longitude: position.target.longitude
+            )
+            parent.onCameraMove(center)
+        }
+    }
+}
+
+// MARK: - Redo Search Button Overlay
+
+struct RedoSearchButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: "arrow.clockwise")
+                    .font(.subheadline)
+                Text("Redo search in this area")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+            }
+            .foregroundColor(.white)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(Color.green)
+            .cornerRadius(20)
+            .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
         }
     }
 }

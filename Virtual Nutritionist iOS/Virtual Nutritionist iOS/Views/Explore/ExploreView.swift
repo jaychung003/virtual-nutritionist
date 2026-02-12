@@ -11,111 +11,112 @@ struct ExploreView: View {
     @StateObject private var viewModel = ExploreViewModel()
     @State private var selectedRestaurant: RestaurantNearbyResult?
     @State private var showingDetail = false
-    @State private var hasAppeared = false  // Prevent auto-load on tab init
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                // Search bar
-                SearchBar(text: $viewModel.searchQuery)
-                    .padding()
-
-                // Location button (only show if not searching)
-                if viewModel.searchQuery.isEmpty {
-                    Button(action: {
-                        viewModel.requestLocation()
-                    }) {
-                        HStack {
-                            Image(systemName: "location.circle.fill")
-                            Text("Use My Location")
-                        }
-                        .font(.headline)
-                        .foregroundColor(.blue)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue.opacity(0.1))
-                        .cornerRadius(10)
+            ZStack {
+                // Map view (always shown)
+                if viewModel.isLoading && viewModel.restaurants.isEmpty {
+                    // Loading state
+                    VStack {
+                        Spacer()
+                        ProgressView("Finding restaurants...")
+                        Spacer()
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
-                }
-
-                // View mode toggle (only show if we have restaurants)
-                if !viewModel.restaurants.isEmpty {
-                    Picker("View Mode", selection: $viewModel.viewMode) {
-                        Text("List").tag(ExploreViewModel.ViewMode.list)
-                        Text("Map").tag(ExploreViewModel.ViewMode.map)
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
-                }
-
-                // Content
-                if viewModel.isLoading {
-                    Spacer()
-                    ProgressView("Loading restaurants...")
-                    Spacer()
-                } else if let error = viewModel.errorMessage {
-                    Spacer()
-                    ErrorView(message: error, retryAction: {
-                        if !viewModel.searchQuery.isEmpty {
-                            Task {
-                                await viewModel.performSearch(query: viewModel.searchQuery)
-                            }
-                        } else if viewModel.userLocation != nil {
-                            Task {
-                                await viewModel.searchNearby()
-                            }
-                        }
-                    })
-                    Spacer()
-                } else if viewModel.restaurants.isEmpty {
-                    Spacer()
-                    EmptyStateView()
-                    Spacer()
-                } else {
-                    // Restaurant list or map view
-                    if viewModel.viewMode == .list {
-                        List(viewModel.restaurants) { restaurant in
-                            Button(action: {
-                                selectedRestaurant = restaurant
-                                showingDetail = true
-                            }) {
-                                RestaurantCard(restaurant: restaurant)
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                        }
-                        .listStyle(PlainListStyle())
-                    } else {
-                        // Map view
-                        ZStack(alignment: .bottom) {
-                            RestaurantMapView(
-                                restaurants: viewModel.restaurants,
-                                userLocation: viewModel.userLocation,
-                                selectedRestaurant: $viewModel.selectedMapRestaurant
-                            )
-                            .edgesIgnoringSafeArea(.bottom)
-
-                            // Info card for selected restaurant
-                            if let selected = viewModel.selectedMapRestaurant {
-                                RestaurantInfoCard(restaurant: selected) {
-                                    selectedRestaurant = selected
-                                    showingDetail = true
+                } else if let error = viewModel.errorMessage, viewModel.restaurants.isEmpty {
+                    // Error state
+                    VStack {
+                        Spacer()
+                        ErrorView(message: error, retryAction: {
+                            if !viewModel.searchQuery.isEmpty {
+                                Task {
+                                    await viewModel.performSearch(query: viewModel.searchQuery)
                                 }
-                                .transition(.move(edge: .bottom))
-                                .animation(.easeInOut, value: viewModel.selectedMapRestaurant)
+                            } else if viewModel.userLocation != nil {
+                                Task {
+                                    await viewModel.searchNearby()
+                                }
+                            }
+                        })
+                        Spacer()
+                    }
+                } else if viewModel.restaurants.isEmpty && viewModel.userLocation == nil {
+                    // Waiting for location
+                    VStack {
+                        Spacer()
+                        VStack(spacing: 16) {
+                            Image(systemName: "location.circle")
+                                .font(.system(size: 60))
+                                .foregroundColor(.gray)
+
+                            Text("Getting your location...")
+                                .font(.headline)
+
+                            Text("We'll show nearby restaurants once we find you")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 40)
+                        }
+                        Spacer()
+                    }
+                } else {
+                    // Map view
+                    RestaurantMapView(
+                        restaurants: viewModel.restaurants,
+                        userLocation: viewModel.userLocation,
+                        selectedRestaurant: $viewModel.selectedMapRestaurant,
+                        showRedoButton: viewModel.showRedoSearchButton,
+                        onCameraMove: { center in
+                            viewModel.onMapCameraMoved(newCenter: center)
+                        },
+                        onRedoSearch: { center in
+                            viewModel.redoSearchInArea(center: center)
+                        }
+                    )
+                    .edgesIgnoringSafeArea(.bottom)
+
+                    // Redo search button (top center)
+                    if viewModel.showRedoSearchButton {
+                        VStack {
+                            RedoSearchButton {
+                                if let center = viewModel.currentMapCenter {
+                                    viewModel.redoSearchInArea(center: center)
+                                }
+                            }
+                            .padding(.top, 80)  // Below search bar
+                            Spacer()
+                        }
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .animation(.easeInOut, value: viewModel.showRedoSearchButton)
+                    }
+
+                    // Info card for selected restaurant
+                    if let selected = viewModel.selectedMapRestaurant {
+                        VStack {
+                            Spacer()
+                            RestaurantInfoCard(restaurant: selected) {
+                                selectedRestaurant = selected
+                                showingDetail = true
                             }
                         }
+                        .transition(.move(edge: .bottom))
+                        .animation(.easeInOut, value: viewModel.selectedMapRestaurant)
                     }
+                }
+
+                // Search bar overlay
+                VStack {
+                    SearchBar(text: $viewModel.searchQuery)
+                        .padding()
+                        .background(Color(.systemBackground).opacity(0.95))
+                    Spacer()
                 }
             }
             .navigationTitle("Explore")
+            .navigationBarTitleDisplayMode(.inline)
             .sheet(item: $selectedRestaurant) { restaurant in
                 RestaurantDetailView(placeId: restaurant.placeId)
-            }
-            .onAppear {
-                hasAppeared = true
             }
         }
     }
