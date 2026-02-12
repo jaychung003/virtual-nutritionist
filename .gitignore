@@ -24,6 +24,7 @@ DerivedData/
 *.dSYM.zip
 *.dSYM
 .build/
+Virtual-Nutritionist-iOS-Info.plist
 
 # IDE
 .idea/
