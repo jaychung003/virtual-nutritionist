@@ -66,6 +66,7 @@ struct ScannerHomeView: View {
     @State private var contributionMessage: String?  // NEW
     @State private var isAnalyzing = false
     @State private var errorMessage: String?
+    @State private var backgroundAnalysisTask: Task<[MenuItem], Error>?  // For pre-loading analysis
 
     var body: some View {
         NavigationStack {
@@ -189,12 +190,15 @@ struct ScannerHomeView: View {
             }
             .onChange(of: capturedImage) { _, newImage in
                 if let image = newImage {
+                    // Start analysis immediately in background
+                    startBackgroundAnalysis(image)
+
                     if FeatureFlags.exploreEnabled {
-                        // Show restaurant search for community contribution
+                        // Show restaurant search while analysis runs in background
                         showingRestaurantSearch = true
                     } else {
-                        // Analyze directly without restaurant linking
-                        analyzeAnonymously(image)
+                        // Show analyzing spinner (will use background task)
+                        showAnalysisInProgress()
                     }
                 }
             }
@@ -213,37 +217,57 @@ struct ScannerHomeView: View {
         }
     }
     
-    // Anonymous scan (no restaurant linking)
-    private func analyzeAnonymously(_ image: UIImage) {
+    // Start analysis in background immediately when photo is taken
+    private func startBackgroundAnalysis(_ image: UIImage) {
+        backgroundAnalysisTask = Task {
+            return try await APIService.shared.analyzeMenu(
+                image: image,
+                protocols: userProfile.selectedProtocols
+            )
+        }
+    }
+
+    // Show analysis in progress (for non-restaurant scans)
+    private func showAnalysisInProgress() {
         isAnalyzing = true
         errorMessage = nil
         contributionMessage = nil
 
         Task {
             do {
-                let results = try await APIService.shared.analyzeMenu(
-                    image: image,
-                    protocols: userProfile.selectedProtocols
-                )
+                // Wait for background analysis to complete
+                guard let task = backgroundAnalysisTask else { return }
+                let results = try await task.value
 
                 await MainActor.run {
                     analysisResults = results
                     isAnalyzing = false
                     capturedImage = nil
+                    backgroundAnalysisTask = nil
                     showingResults = true
                 }
             } catch {
                 await MainActor.run {
                     isAnalyzing = false
                     capturedImage = nil
+                    backgroundAnalysisTask = nil
                     errorMessage = error.localizedDescription
                 }
             }
         }
     }
 
+    // Anonymous scan (no restaurant linking) - now uses background task
+    private func analyzeAnonymously(_ image: UIImage) {
+        showAnalysisInProgress()
+    }
+
     // Community contribution (linked to restaurant)
     private func analyzeWithRestaurant(_ image: UIImage, placeId: String, name: String) {
+        // Cancel background task if running (we need to use restaurant endpoint)
+        backgroundAnalysisTask?.cancel()
+        backgroundAnalysisTask = nil
+
         isAnalyzing = true
         errorMessage = nil
 
