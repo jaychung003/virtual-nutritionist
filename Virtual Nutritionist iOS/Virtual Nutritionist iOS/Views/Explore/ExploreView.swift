@@ -28,7 +28,6 @@ struct ExploreView: View {
                         viewModel.redoSearchInArea(center: center)
                     }
                 )
-                .edgesIgnoringSafeArea(.bottom)
 
                 // Loading overlay (on top of map)
                 if viewModel.isLoading {
