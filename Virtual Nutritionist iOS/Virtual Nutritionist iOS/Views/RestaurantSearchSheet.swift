@@ -91,43 +91,60 @@ struct RestaurantSearchSheet: View {
                             onSelect(restaurant.placeId, restaurant.name)
                             dismiss()
                         }) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(restaurant.name)
-                                    .font(.headline)
-                                    .foregroundColor(.primary)
+                            HStack(spacing: 12) {
+                                // Restaurant info
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(restaurant.name)
+                                        .font(.headline)
+                                        .foregroundColor(.primary)
 
-                                if !restaurant.vicinity.isEmpty {
-                                    Text(restaurant.vicinity)
-                                        .font(.subheadline)
-                                        .foregroundColor(.gray)
-                                }
+                                    if !restaurant.vicinity.isEmpty {
+                                        Text(restaurant.vicinity)
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
+                                    }
 
-                                HStack(spacing: 4) {
-                                    if let rating = restaurant.rating {
-                                        HStack(spacing: 2) {
-                                            Image(systemName: "star.fill")
-                                                .font(.caption)
-                                                .foregroundColor(.yellow)
-                                            Text(String(format: "%.1f", rating))
+                                    HStack(spacing: 4) {
+                                        if let rating = restaurant.rating {
+                                            HStack(spacing: 2) {
+                                                Image(systemName: "star.fill")
+                                                    .font(.caption)
+                                                    .foregroundColor(.yellow)
+                                                Text(String(format: "%.1f", rating))
+                                                    .font(.subheadline)
+                                            }
+                                        }
+
+                                        if !restaurant.priceString.isEmpty {
+                                            Text("·")
+                                                .foregroundColor(.gray)
+                                            Text(restaurant.priceString)
                                                 .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                        }
+
+                                        if let cuisine = restaurant.cuisineType {
+                                            Text("·")
+                                                .foregroundColor(.gray)
+                                            Text(cuisine)
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
                                         }
                                     }
+                                }
 
-                                    if !restaurant.priceString.isEmpty {
-                                        Text("·")
-                                            .foregroundColor(.gray)
-                                        Text(restaurant.priceString)
-                                            .font(.subheadline)
-                                            .foregroundColor(.gray)
-                                    }
+                                Spacer()
 
-                                    if let cuisine = restaurant.cuisineType {
-                                        Text("·")
-                                            .foregroundColor(.gray)
-                                        Text(cuisine)
-                                            .font(.subheadline)
-                                            .foregroundColor(.gray)
-                                    }
+                                // Distance badge
+                                if restaurant.distanceMeters > 0 {
+                                    Text(restaurant.distanceString)
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.blue)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color.blue.opacity(0.1))
+                                        .cornerRadius(8)
                                 }
                             }
                             .padding(.vertical, 4)
@@ -260,7 +277,7 @@ class RestaurantSearchViewModel: NSObject, ObservableObject {
             restaurants = try await apiService.getNearbyRestaurants(
                 latitude: location.latitude,
                 longitude: location.longitude,
-                radiusMeters: 2000  // 2km for search
+                radiusMeters: 1609  // 1 mile, sorted by distance (closest first)
             )
         } catch {
             errorMessage = "Failed to load nearby restaurants: \(error.localizedDescription)"
