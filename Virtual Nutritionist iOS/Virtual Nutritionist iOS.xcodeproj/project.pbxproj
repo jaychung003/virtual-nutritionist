@@ -255,8 +255,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Virtual-Nutritionist-iOS-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Diet Watch";
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Virtual Nutritionist needs camera access to photograph restaurant menus for dietary analysis.\nMenu Scanner needs camera access to photograph restaurant menus for dietary analysis.\n";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We use your location to find nearby restaurants with menu data";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Virtual Nutritionist needs photo library access to select menu photos for dietary analysis.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -292,8 +294,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Virtual-Nutritionist-iOS-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Diet Watch";
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Virtual Nutritionist needs camera access to photograph restaurant menus for dietary analysis.\nMenu Scanner needs camera access to photograph restaurant menus for dietary analysis.\n";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We use your location to find nearby restaurants with menu data";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Virtual Nutritionist needs photo library access to select menu photos for dietary analysis.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

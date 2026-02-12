@@ -11,6 +11,11 @@ import Combine
 
 @MainActor
 class ExploreViewModel: NSObject, ObservableObject {
+    enum ViewMode {
+        case list
+        case map
+    }
+
     @Published var searchQuery = ""
     @Published var restaurants: [RestaurantNearbyResult] = []
     @Published var isLoading = false
@@ -19,6 +24,10 @@ class ExploreViewModel: NSObject, ObservableObject {
 
     @Published var userLocation: CLLocationCoordinate2D?
     @Published var locationPermissionDenied = false
+
+    // Map-specific properties
+    @Published var viewMode: ViewMode = .list
+    @Published var selectedMapRestaurant: RestaurantNearbyResult?
 
     private let apiService = APIService.shared
     private let locationManager = CLLocationManager()

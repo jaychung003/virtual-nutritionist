@@ -40,6 +40,17 @@ struct ExploreView: View {
                     .padding(.bottom, 8)
                 }
 
+                // View mode toggle (only show if we have restaurants)
+                if !viewModel.restaurants.isEmpty {
+                    Picker("View Mode", selection: $viewModel.viewMode) {
+                        Text("List").tag(ExploreViewModel.ViewMode.list)
+                        Text("Map").tag(ExploreViewModel.ViewMode.map)
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+                }
+
                 // Content
                 if viewModel.isLoading {
                     Spacer()
@@ -64,17 +75,39 @@ struct ExploreView: View {
                     EmptyStateView()
                     Spacer()
                 } else {
-                    // Restaurant list
-                    List(viewModel.restaurants) { restaurant in
-                        Button(action: {
-                            selectedRestaurant = restaurant
-                            showingDetail = true
-                        }) {
-                            RestaurantCard(restaurant: restaurant)
+                    // Restaurant list or map view
+                    if viewModel.viewMode == .list {
+                        List(viewModel.restaurants) { restaurant in
+                            Button(action: {
+                                selectedRestaurant = restaurant
+                                showingDetail = true
+                            }) {
+                                RestaurantCard(restaurant: restaurant)
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
-                        .buttonStyle(PlainButtonStyle())
+                        .listStyle(PlainListStyle())
+                    } else {
+                        // Map view
+                        ZStack(alignment: .bottom) {
+                            RestaurantMapView(
+                                restaurants: viewModel.restaurants,
+                                userLocation: viewModel.userLocation,
+                                selectedRestaurant: $viewModel.selectedMapRestaurant
+                            )
+                            .edgesIgnoringSafeArea(.bottom)
+
+                            // Info card for selected restaurant
+                            if let selected = viewModel.selectedMapRestaurant {
+                                RestaurantInfoCard(restaurant: selected) {
+                                    selectedRestaurant = selected
+                                    showingDetail = true
+                                }
+                                .transition(.move(edge: .bottom))
+                                .animation(.easeInOut, value: viewModel.selectedMapRestaurant)
+                            }
+                        }
                     }
-                    .listStyle(PlainListStyle())
                 }
             }
             .navigationTitle("Explore")
