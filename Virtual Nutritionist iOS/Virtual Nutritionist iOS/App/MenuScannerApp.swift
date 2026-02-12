@@ -1,4 +1,5 @@
 import SwiftUI
+import GoogleMaps
 
 @main
 struct MenuScannerApp: App {
@@ -6,6 +7,13 @@ struct MenuScannerApp: App {
     @StateObject private var authViewModel = AuthViewModel()
     @AppStorage("hasSeenOnboardingDisclaimer") private var hasSeenDisclaimer = false
     @State private var showingDisclaimer = false
+
+    init() {
+        // Initialize Google Maps SDK
+        if let apiKey = Bundle.main.object(forInfoDictionaryKey: "GMSApiKey") as? String {
+            GMSServices.provideAPIKey(apiKey)
+        }
+    }
 
     var body: some Scene {
         WindowGroup {

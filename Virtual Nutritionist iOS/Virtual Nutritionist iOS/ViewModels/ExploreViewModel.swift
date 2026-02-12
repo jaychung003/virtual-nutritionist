@@ -13,12 +13,20 @@ import Combine
 class ExploreViewModel: NSObject, ObservableObject {
     @Published var searchQuery = ""
     @Published var restaurants: [RestaurantNearbyResult] = []
-    @Published var isLoading = false
+    @Published var isLoading = true  // Start as loading while getting location
     @Published var errorMessage: String?
     @Published var selectedRestaurant: RestaurantDetail?
 
     @Published var userLocation: CLLocationCoordinate2D?
     @Published var locationPermissionDenied = false
+
+    // Map-specific properties
+    @Published var selectedMapRestaurant: RestaurantNearbyResult?
+    @Published var showRedoSearchButton = false
+
+    // Track original search location to detect map movement
+    var lastSearchCenter: CLLocationCoordinate2D?
+    var currentMapCenter: CLLocationCoordinate2D?
 
     private let apiService = APIService.shared
     private let locationManager = CLLocationManager()
@@ -30,6 +38,9 @@ class ExploreViewModel: NSObject, ObservableObject {
         super.init()
         locationManager.delegate = self
 
+        // Load cached data immediately for instant display
+        loadCachedData()
+
         // Search as user types (with debounce)
         $searchQuery
             .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
@@ -39,9 +50,64 @@ class ExploreViewModel: NSObject, ObservableObject {
                     Task {
                         await self?.performSearch(query: query)
                     }
+                } else {
+                    // When search is cleared, search nearby if we have location
+                    if let location = self?.userLocation {
+                        Task {
+                            await self?.searchNearby()
+                        }
+                    }
                 }
             }
             .store(in: &cancellables)
+
+        // Auto-request location on init
+        requestLocation()
+    }
+
+    // MARK: - Caching
+
+    private func loadCachedData() {
+        // Load cached location
+        if let latData = UserDefaults.standard.data(forKey: "lastKnownLat"),
+           let lonData = UserDefaults.standard.data(forKey: "lastKnownLon"),
+           let lat = try? JSONDecoder().decode(Double.self, from: latData),
+           let lon = try? JSONDecoder().decode(Double.self, from: lonData) {
+            userLocation = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+            lastSearchCenter = userLocation
+        }
+
+        // Load cached restaurants
+        if let data = UserDefaults.standard.data(forKey: "cachedRestaurants"),
+           let cached = try? JSONDecoder().decode([RestaurantNearbyResult].self, from: data) {
+            restaurants = cached
+            isLoading = false  // Show cached data immediately
+
+            // Refresh in background
+            if let location = userLocation {
+                Task {
+                    await searchNearby(center: location)
+                }
+            }
+        }
+    }
+
+    private func cacheData() {
+        // Cache location
+        if let location = userLocation {
+            if let latData = try? JSONEncoder().encode(location.latitude),
+               let lonData = try? JSONEncoder().encode(location.longitude) {
+                UserDefaults.standard.set(latData, forKey: "lastKnownLat")
+                UserDefaults.standard.set(lonData, forKey: "lastKnownLon")
+            }
+        }
+
+        // Cache restaurants
+        if !restaurants.isEmpty {
+            if let data = try? JSONEncoder().encode(restaurants) {
+                UserDefaults.standard.set(data, forKey: "cachedRestaurants")
+            }
+        }
     }
 
     // MARK: - Location
@@ -108,24 +174,66 @@ class ExploreViewModel: NSObject, ObservableObject {
             return
         }
 
+        await searchNearby(center: location)
+    }
+
+    func searchNearby(center: CLLocationCoordinate2D, limit: Int = 15) async {
         isLoading = true
         errorMessage = nil
+        showRedoSearchButton = false
 
         do {
             // Get user's active protocols for filtering
             let protocols = userProfile?.selectedProtocols ?? []
 
+            // Fetch fewer restaurants initially for faster load (15 vs 60)
             restaurants = try await apiService.getNearbyRestaurants(
-                latitude: location.latitude,
-                longitude: location.longitude,
+                latitude: center.latitude,
+                longitude: center.longitude,
                 radiusMeters: 1609,  // 1 mile radius (already sorted by distance)
-                protocols: protocols
+                protocols: protocols,
+                limit: limit
             )
+
+            // Track this search center
+            lastSearchCenter = center
+
+            // Cache for instant next load
+            cacheData()
         } catch {
             errorMessage = "Failed to load nearby restaurants: \(error.localizedDescription)"
         }
 
         isLoading = false
+    }
+
+    // Called when map camera moves significantly
+    func onMapCameraMoved(newCenter: CLLocationCoordinate2D) {
+        // Store current map center
+        currentMapCenter = newCenter
+
+        // Check if moved significantly from last search center
+        guard let lastCenter = lastSearchCenter else { return }
+
+        let distance = calculateDistance(
+            from: lastCenter,
+            to: newCenter
+        )
+
+        // Show redo button if moved more than 500 meters (~0.3 miles)
+        showRedoSearchButton = distance > 500
+    }
+
+    func redoSearchInArea(center: CLLocationCoordinate2D) {
+        Task {
+            await searchNearby(center: center)
+        }
+    }
+
+    private func calculateDistance(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D) -> Double {
+        let location1 = CLLocation(latitude: from.latitude, longitude: from.longitude)
+        let location2 = CLLocation(latitude: to.latitude, longitude: to.longitude)
+        return location1.distance(from: location2)
     }
 
     // MARK: - Restaurant Details
@@ -152,6 +260,7 @@ extension ExploreViewModel: CLLocationManagerDelegate {
 
         Task { @MainActor in
             self.userLocation = location.coordinate
+            self.cacheData()  // Cache location immediately
             await self.searchNearby()
         }
     }

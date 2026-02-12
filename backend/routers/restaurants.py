@@ -118,6 +118,7 @@ async def get_nearby_restaurants(
     radius_meters: int = Query(default=5000, le=50000),
     cuisine_type: Optional[str] = None,
     protocols: List[str] = Query(default=[]),
+    limit: int = Query(default=15, le=60, description="Max restaurants to return"),
     db: Session = Depends(get_db)
 ):
     """
@@ -128,12 +129,13 @@ async def get_nearby_restaurants(
     - **radius_meters**: Search radius in meters (max 50000)
     - **cuisine_type**: Optional cuisine filter
     - **protocols**: Dietary protocols to check (for safety counts)
+    - **limit**: Maximum number of restaurants to return (default 15, max 60)
 
     Returns nearby restaurants with analysis status and safety info.
     """
     # Get restaurants from Google Places
     google_restaurants = GooglePlacesService.nearby_search(
-        latitude, longitude, radius_meters, cuisine_type
+        latitude, longitude, radius_meters, cuisine_type, max_results=limit
     )
 
     if not google_restaurants:

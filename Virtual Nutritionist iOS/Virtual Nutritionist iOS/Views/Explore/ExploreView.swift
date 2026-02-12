@@ -11,78 +11,89 @@ struct ExploreView: View {
     @StateObject private var viewModel = ExploreViewModel()
     @State private var selectedRestaurant: RestaurantNearbyResult?
     @State private var showingDetail = false
-    @State private var hasAppeared = false  // Prevent auto-load on tab init
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                // Search bar
-                SearchBar(text: $viewModel.searchQuery)
-                    .padding()
-
-                // Location button (only show if not searching)
-                if viewModel.searchQuery.isEmpty {
-                    Button(action: {
-                        viewModel.requestLocation()
-                    }) {
-                        HStack {
-                            Image(systemName: "location.circle.fill")
-                            Text("Use My Location")
-                        }
-                        .font(.headline)
-                        .foregroundColor(.blue)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue.opacity(0.1))
-                        .cornerRadius(10)
+            ZStack {
+                // Always show map immediately (parallel loading with location)
+                RestaurantMapView(
+                    restaurants: viewModel.restaurants,
+                    userLocation: viewModel.userLocation,
+                    selectedRestaurant: $viewModel.selectedMapRestaurant,
+                    showRedoButton: viewModel.showRedoSearchButton,
+                    onCameraMove: { center in
+                        viewModel.onMapCameraMoved(newCenter: center)
+                    },
+                    onRedoSearch: { center in
+                        viewModel.redoSearchInArea(center: center)
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
+                )
+
+                // Loading overlay (on top of map)
+                if viewModel.isLoading {
+                    VStack {
+                        HStack {
+                            Spacer()
+                            HStack(spacing: 12) {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text(viewModel.userLocation == nil ? "Getting your location..." : "Finding restaurants...")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(Color(.systemBackground))
+                            .cornerRadius(20)
+                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+                            Spacer()
+                        }
+                        .padding(.top, 80)
+                        Spacer()
+                    }
+                    .transition(.opacity)
                 }
 
-                // Content
-                if viewModel.isLoading {
-                    Spacer()
-                    ProgressView("Loading restaurants...")
-                    Spacer()
-                } else if let error = viewModel.errorMessage {
-                    Spacer()
-                    ErrorView(message: error, retryAction: {
-                        if !viewModel.searchQuery.isEmpty {
-                            Task {
-                                await viewModel.performSearch(query: viewModel.searchQuery)
-                            }
-                        } else if viewModel.userLocation != nil {
-                            Task {
-                                await viewModel.searchNearby()
+                // Redo search button (top center)
+                if viewModel.showRedoSearchButton && !viewModel.isLoading {
+                    VStack {
+                        RedoSearchButton {
+                            if let center = viewModel.currentMapCenter {
+                                viewModel.redoSearchInArea(center: center)
                             }
                         }
-                    })
-                    Spacer()
-                } else if viewModel.restaurants.isEmpty {
-                    Spacer()
-                    EmptyStateView()
-                    Spacer()
-                } else {
-                    // Restaurant list
-                    List(viewModel.restaurants) { restaurant in
-                        Button(action: {
-                            selectedRestaurant = restaurant
-                            showingDetail = true
-                        }) {
-                            RestaurantCard(restaurant: restaurant)
-                        }
-                        .buttonStyle(PlainButtonStyle())
+                        .padding(.top, 80)  // Below search bar
+                        Spacer()
                     }
-                    .listStyle(PlainListStyle())
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .animation(.easeInOut, value: viewModel.showRedoSearchButton)
+                }
+
+                // Info card for selected restaurant
+                if let selected = viewModel.selectedMapRestaurant {
+                    VStack {
+                        Spacer()
+                        RestaurantInfoCard(restaurant: selected) {
+                            selectedRestaurant = selected
+                            showingDetail = true
+                        }
+                    }
+                    .transition(.move(edge: .bottom))
+                    .animation(.easeInOut, value: viewModel.selectedMapRestaurant)
+                }
+
+                // Search bar overlay
+                VStack {
+                    SearchBar(text: $viewModel.searchQuery)
+                        .padding()
+                        .background(Color(.systemBackground).opacity(0.95))
+                    Spacer()
                 }
             }
             .navigationTitle("Explore")
+            .navigationBarTitleDisplayMode(.inline)
             .sheet(item: $selectedRestaurant) { restaurant in
                 RestaurantDetailView(placeId: restaurant.placeId)
-            }
-            .onAppear {
-                hasAppeared = true
             }
         }
     }

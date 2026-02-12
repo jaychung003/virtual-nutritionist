@@ -15,7 +15,21 @@
       "Bash(URL='https://virtual-nutritionist-1upi.onrender.com/restaurants/ChIJ_dQjyK-AhYARBc9DFlxcclg/analyze?protocols=vegan' echo \"🔍 Analyzing Nopa''''s menu with VEGAN protocol...\" curl -X POST \"$URL\" -H \"Content-Type: application/json\" --max-time 180 -o /tmp/nopa_analysis.json echo \"\" echo \"Response saved. Checking what we got:\" cat /tmp/nopa_analysis.json)",
       "Bash(__NEW_LINE_05ff56dceaa474b1__ echo \"Analysis complete. Result:\")",
       "Bash(/usr/bin/python3:*)",
-      "Bash(open:*)"
+      "Bash(open:*)",
+      "Bash(ls:*)",
+      "Bash(git reset:*)",
+      "Bash(find:*)",
+      "WebSearch",
+      "Bash(plutil:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(cd:*)",
+      "Bash(source:*)",
+      "Bash(psql:*)",
+      "Bash(pg_ctl status:*)",
+      "Bash(brew services start:*)",
+      "Bash(grep:*)",
+      "Bash(git -C \"/Users/jaychung/Virtual Nutritionist\" branch -a)",
+      "Bash(git rm:*)"
     ]
   }
 }

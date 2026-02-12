@@ -239,9 +239,10 @@ class APIService {
         longitude: Double,
         radiusMeters: Int = 5000,
         cuisineType: String? = nil,
-        protocols: [String] = []
+        protocols: [String] = [],
+        limit: Int = 15
     ) async throws -> [RestaurantNearbyResult] {
-        var urlString = "\(baseURL)/restaurants/nearby?latitude=\(latitude)&longitude=\(longitude)&radius_meters=\(radiusMeters)"
+        var urlString = "\(baseURL)/restaurants/nearby?latitude=\(latitude)&longitude=\(longitude)&radius_meters=\(radiusMeters)&limit=\(limit)"
 
         if let cuisine = cuisineType {
             urlString += "&cuisine_type=\(cuisine.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
