@@ -9,7 +9,7 @@ import Foundation
 
 struct FeatureFlags {
     /// Enable restaurant discovery and community-contributed menus
-    static let exploreEnabled = false
+    static let exploreEnabled = true
 
     // Add more feature flags here as needed
     // static let bookmarksEnabled = false
