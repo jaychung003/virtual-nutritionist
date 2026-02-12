@@ -65,14 +65,15 @@ struct RestaurantMapView: UIViewRepresentable {
             marker.map = mapView
         }
 
-        // Update camera if user location changed
-        if let location = userLocation {
+        // Only center on user location on first load
+        if let location = userLocation, !context.coordinator.hasInitiallyPositioned {
             let camera = GMSCameraPosition.camera(
                 withLatitude: location.latitude,
                 longitude: location.longitude,
                 zoom: 14.0
             )
             mapView.animate(to: camera)
+            context.coordinator.hasInitiallyPositioned = true
         }
     }
 
@@ -103,6 +104,7 @@ struct RestaurantMapView: UIViewRepresentable {
 
     class Coordinator: NSObject, GMSMapViewDelegate {
         var parent: RestaurantMapView
+        var hasInitiallyPositioned = false
 
         init(_ parent: RestaurantMapView) {
             self.parent = parent
