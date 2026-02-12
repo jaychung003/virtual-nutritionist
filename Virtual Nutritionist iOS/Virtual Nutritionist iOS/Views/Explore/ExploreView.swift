@@ -15,52 +15,8 @@ struct ExploreView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Map view (always shown)
-                if viewModel.isLoading && viewModel.restaurants.isEmpty {
-                    // Loading state
-                    VStack {
-                        Spacer()
-                        ProgressView("Finding restaurants...")
-                        Spacer()
-                    }
-                } else if let error = viewModel.errorMessage, viewModel.restaurants.isEmpty {
-                    // Error state
-                    VStack {
-                        Spacer()
-                        ErrorView(message: error, retryAction: {
-                            if !viewModel.searchQuery.isEmpty {
-                                Task {
-                                    await viewModel.performSearch(query: viewModel.searchQuery)
-                                }
-                            } else if viewModel.userLocation != nil {
-                                Task {
-                                    await viewModel.searchNearby()
-                                }
-                            }
-                        })
-                        Spacer()
-                    }
-                } else if viewModel.restaurants.isEmpty && viewModel.userLocation == nil {
-                    // Waiting for location
-                    VStack {
-                        Spacer()
-                        VStack(spacing: 16) {
-                            Image(systemName: "location.circle")
-                                .font(.system(size: 60))
-                                .foregroundColor(.gray)
-
-                            Text("Getting your location...")
-                                .font(.headline)
-
-                            Text("We'll show nearby restaurants once we find you")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 40)
-                        }
-                        Spacer()
-                    }
-                } else {
+                // Show map as soon as we have location (or immediately with default center)
+                if viewModel.userLocation != nil || !viewModel.restaurants.isEmpty {
                     // Map view
                     RestaurantMapView(
                         restaurants: viewModel.restaurants,
@@ -76,8 +32,33 @@ struct ExploreView: View {
                     )
                     .edgesIgnoringSafeArea(.bottom)
 
+                    // Loading overlay (on top of map)
+                    if viewModel.isLoading {
+                        VStack {
+                            HStack {
+                                Spacer()
+                                HStack(spacing: 12) {
+                                    ProgressView()
+                                        .scaleEffect(0.8)
+                                    Text("Finding restaurants...")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(Color(.systemBackground))
+                                .cornerRadius(20)
+                                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+                                Spacer()
+                            }
+                            .padding(.top, 80)
+                            Spacer()
+                        }
+                        .transition(.opacity)
+                    }
+
                     // Redo search button (top center)
-                    if viewModel.showRedoSearchButton {
+                    if viewModel.showRedoSearchButton && !viewModel.isLoading {
                         VStack {
                             RedoSearchButton {
                                 if let center = viewModel.currentMapCenter {
@@ -102,6 +83,33 @@ struct ExploreView: View {
                         }
                         .transition(.move(edge: .bottom))
                         .animation(.easeInOut, value: viewModel.selectedMapRestaurant)
+                    }
+                } else if let error = viewModel.errorMessage {
+                    // Error state (only if no location and error)
+                    VStack {
+                        Spacer()
+                        ErrorView(message: error, retryAction: {
+                            viewModel.requestLocation()
+                        })
+                        Spacer()
+                    }
+                } else {
+                    // Waiting for location (initial state)
+                    VStack {
+                        Spacer()
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .scaleEffect(1.5)
+                                .padding(.bottom, 8)
+
+                            Text("Getting your location...")
+                                .font(.headline)
+
+                            Text("This should only take a moment")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
+                        Spacer()
                     }
                 }
 
