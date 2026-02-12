@@ -18,21 +18,12 @@ struct RestaurantMapView: UIViewRepresentable {
     let onRedoSearch: (CLLocationCoordinate2D) -> Void
 
     func makeUIView(context: Context) -> GMSMapView {
-        let camera: GMSCameraPosition
-        if let location = userLocation {
-            camera = GMSCameraPosition.camera(
-                withLatitude: location.latitude,
-                longitude: location.longitude,
-                zoom: 14.0
-            )
-        } else {
-            // Default to San Francisco if no location
-            camera = GMSCameraPosition.camera(
-                withLatitude: 37.7749,
-                longitude: -122.4194,
-                zoom: 12.0
-            )
-        }
+        // Start with default center (San Francisco) - will animate to user location when available
+        let camera = GMSCameraPosition.camera(
+            withLatitude: 37.7749,
+            longitude: -122.4194,
+            zoom: 12.0
+        )
 
         let mapView = GMSMapView.map(withFrame: .zero, camera: camera)
         mapView.delegate = context.coordinator
@@ -65,15 +56,15 @@ struct RestaurantMapView: UIViewRepresentable {
             marker.map = mapView
         }
 
-        // Only center on user location on first load
-        if let location = userLocation, !context.coordinator.hasInitiallyPositioned {
+        // Animate to user location when it first becomes available
+        if let location = userLocation, !context.coordinator.hasUserLocation {
             let camera = GMSCameraPosition.camera(
                 withLatitude: location.latitude,
                 longitude: location.longitude,
                 zoom: 14.0
             )
             mapView.animate(to: camera)
-            context.coordinator.hasInitiallyPositioned = true
+            context.coordinator.hasUserLocation = true
         }
     }
 
@@ -104,7 +95,7 @@ struct RestaurantMapView: UIViewRepresentable {
 
     class Coordinator: NSObject, GMSMapViewDelegate {
         var parent: RestaurantMapView
-        var hasInitiallyPositioned = false
+        var hasUserLocation = false
 
         init(_ parent: RestaurantMapView) {
             self.parent = parent

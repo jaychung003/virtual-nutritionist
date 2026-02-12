@@ -15,102 +15,72 @@ struct ExploreView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Show map as soon as we have location (or immediately with default center)
-                if viewModel.userLocation != nil || !viewModel.restaurants.isEmpty {
-                    // Map view
-                    RestaurantMapView(
-                        restaurants: viewModel.restaurants,
-                        userLocation: viewModel.userLocation,
-                        selectedRestaurant: $viewModel.selectedMapRestaurant,
-                        showRedoButton: viewModel.showRedoSearchButton,
-                        onCameraMove: { center in
-                            viewModel.onMapCameraMoved(newCenter: center)
-                        },
-                        onRedoSearch: { center in
-                            viewModel.redoSearchInArea(center: center)
-                        }
-                    )
-                    .edgesIgnoringSafeArea(.bottom)
+                // Always show map immediately (parallel loading with location)
+                RestaurantMapView(
+                    restaurants: viewModel.restaurants,
+                    userLocation: viewModel.userLocation,
+                    selectedRestaurant: $viewModel.selectedMapRestaurant,
+                    showRedoButton: viewModel.showRedoSearchButton,
+                    onCameraMove: { center in
+                        viewModel.onMapCameraMoved(newCenter: center)
+                    },
+                    onRedoSearch: { center in
+                        viewModel.redoSearchInArea(center: center)
+                    }
+                )
+                .edgesIgnoringSafeArea(.bottom)
 
-                    // Loading overlay (on top of map)
-                    if viewModel.isLoading {
-                        VStack {
-                            HStack {
-                                Spacer()
-                                HStack(spacing: 12) {
-                                    ProgressView()
-                                        .scaleEffect(0.8)
-                                    Text("Finding restaurants...")
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
-                                }
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 10)
-                                .background(Color(.systemBackground))
-                                .cornerRadius(20)
-                                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-                                Spacer()
+                // Loading overlay (on top of map)
+                if viewModel.isLoading {
+                    VStack {
+                        HStack {
+                            Spacer()
+                            HStack(spacing: 12) {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text(viewModel.userLocation == nil ? "Getting your location..." : "Finding restaurants...")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
                             }
-                            .padding(.top, 80)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(Color(.systemBackground))
+                            .cornerRadius(20)
+                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
                             Spacer()
                         }
-                        .transition(.opacity)
+                        .padding(.top, 80)
+                        Spacer()
                     }
+                    .transition(.opacity)
+                }
 
-                    // Redo search button (top center)
-                    if viewModel.showRedoSearchButton && !viewModel.isLoading {
-                        VStack {
-                            RedoSearchButton {
-                                if let center = viewModel.currentMapCenter {
-                                    viewModel.redoSearchInArea(center: center)
-                                }
-                            }
-                            .padding(.top, 80)  // Below search bar
-                            Spacer()
-                        }
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                        .animation(.easeInOut, value: viewModel.showRedoSearchButton)
-                    }
-
-                    // Info card for selected restaurant
-                    if let selected = viewModel.selectedMapRestaurant {
-                        VStack {
-                            Spacer()
-                            RestaurantInfoCard(restaurant: selected) {
-                                selectedRestaurant = selected
-                                showingDetail = true
+                // Redo search button (top center)
+                if viewModel.showRedoSearchButton && !viewModel.isLoading {
+                    VStack {
+                        RedoSearchButton {
+                            if let center = viewModel.currentMapCenter {
+                                viewModel.redoSearchInArea(center: center)
                             }
                         }
-                        .transition(.move(edge: .bottom))
-                        .animation(.easeInOut, value: viewModel.selectedMapRestaurant)
+                        .padding(.top, 80)  // Below search bar
+                        Spacer()
                     }
-                } else if let error = viewModel.errorMessage {
-                    // Error state (only if no location and error)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .animation(.easeInOut, value: viewModel.showRedoSearchButton)
+                }
+
+                // Info card for selected restaurant
+                if let selected = viewModel.selectedMapRestaurant {
                     VStack {
                         Spacer()
-                        ErrorView(message: error, retryAction: {
-                            viewModel.requestLocation()
-                        })
-                        Spacer()
-                    }
-                } else {
-                    // Waiting for location (initial state)
-                    VStack {
-                        Spacer()
-                        VStack(spacing: 16) {
-                            ProgressView()
-                                .scaleEffect(1.5)
-                                .padding(.bottom, 8)
-
-                            Text("Getting your location...")
-                                .font(.headline)
-
-                            Text("This should only take a moment")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
+                        RestaurantInfoCard(restaurant: selected) {
+                            selectedRestaurant = selected
+                            showingDetail = true
                         }
-                        Spacer()
                     }
+                    .transition(.move(edge: .bottom))
+                    .animation(.easeInOut, value: viewModel.selectedMapRestaurant)
                 }
 
                 // Search bar overlay

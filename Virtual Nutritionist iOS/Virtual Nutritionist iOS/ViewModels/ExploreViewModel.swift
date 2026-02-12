@@ -13,7 +13,7 @@ import Combine
 class ExploreViewModel: NSObject, ObservableObject {
     @Published var searchQuery = ""
     @Published var restaurants: [RestaurantNearbyResult] = []
-    @Published var isLoading = false
+    @Published var isLoading = true  // Start as loading while getting location
     @Published var errorMessage: String?
     @Published var selectedRestaurant: RestaurantDetail?
 
