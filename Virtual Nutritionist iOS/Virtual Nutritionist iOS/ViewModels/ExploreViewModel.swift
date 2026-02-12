@@ -118,7 +118,7 @@ class ExploreViewModel: NSObject, ObservableObject {
             restaurants = try await apiService.getNearbyRestaurants(
                 latitude: location.latitude,
                 longitude: location.longitude,
-                radiusMeters: 5000,
+                radiusMeters: 1609,  // 1 mile radius (already sorted by distance)
                 protocols: protocols
             )
         } catch {

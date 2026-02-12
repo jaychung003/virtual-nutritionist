@@ -77,7 +77,8 @@ class GooglePlacesService:
         latitude: float,
         longitude: float,
         radius_meters: int = 5000,
-        cuisine_type: str = None
+        cuisine_type: str = None,
+        max_results: int = 60
     ) -> List[Dict]:
         """
         Find restaurants near a location.
@@ -87,10 +88,13 @@ class GooglePlacesService:
             longitude: Longitude coordinate
             radius_meters: Search radius in meters (max 50000)
             cuisine_type: Optional cuisine filter (e.g., "italian", "mexican")
+            max_results: Maximum number of results to return (default 60)
 
         Returns:
             List of restaurant dictionaries
         """
+        import time
+
         url = f"{BASE_URL}/nearbysearch/json"
 
         params = {
@@ -103,37 +107,65 @@ class GooglePlacesService:
         if cuisine_type:
             params["keyword"] = cuisine_type
 
+        restaurants = []
+        next_page_token = None
+        pages_fetched = 0
+        max_pages = 3  # Google allows up to 60 results (3 pages of 20)
+
         try:
-            response = requests.get(url, params=params, timeout=10)
-            response.raise_for_status()
-            data = response.json()
+            while pages_fetched < max_pages and len(restaurants) < max_results:
+                # Add page token if we have one
+                if next_page_token:
+                    params["pagetoken"] = next_page_token
+                    # Google requires a short delay before using page token
+                    time.sleep(2)
 
-            if data["status"] != "OK":
-                logger.warning(f"Nearby search returned status: {data['status']}")
-                return []
+                response = requests.get(url, params=params, timeout=10)
+                response.raise_for_status()
+                data = response.json()
 
-            restaurants = []
-            for place in data.get("results", []):
-                restaurants.append({
-                    "place_id": place["place_id"],
-                    "name": place["name"],
-                    "vicinity": place.get("vicinity"),  # Shorter address
-                    "latitude": place["geometry"]["location"]["lat"],
-                    "longitude": place["geometry"]["location"]["lng"],
-                    "rating": place.get("rating"),
-                    "user_ratings_total": place.get("user_ratings_total"),
-                    "price_level": place.get("price_level"),
-                    "types": place.get("types", []),
-                    "business_status": place.get("business_status"),
-                    "photos_available": len(place.get("photos", [])) > 0,
-                    "is_open": place.get("opening_hours", {}).get("open_now")
-                })
+                if data["status"] not in ["OK", "ZERO_RESULTS"]:
+                    logger.warning(f"Nearby search returned status: {data['status']}")
+                    break
 
+                # Process results
+                for place in data.get("results", []):
+                    if len(restaurants) >= max_results:
+                        break
+
+                    restaurants.append({
+                        "place_id": place["place_id"],
+                        "name": place["name"],
+                        "vicinity": place.get("vicinity"),  # Shorter address
+                        "latitude": place["geometry"]["location"]["lat"],
+                        "longitude": place["geometry"]["location"]["lng"],
+                        "rating": place.get("rating"),
+                        "user_ratings_total": place.get("user_ratings_total"),
+                        "price_level": place.get("price_level"),
+                        "types": place.get("types", []),
+                        "business_status": place.get("business_status"),
+                        "photos_available": len(place.get("photos", [])) > 0,
+                        "is_open": place.get("opening_hours", {}).get("open_now")
+                    })
+
+                # Check for more pages
+                next_page_token = data.get("next_page_token")
+                pages_fetched += 1
+
+                # Stop if no more pages
+                if not next_page_token:
+                    break
+
+                # Remove pagetoken from params for next iteration
+                if "pagetoken" in params:
+                    del params["pagetoken"]
+
+            logger.info(f"Nearby search returned {len(restaurants)} restaurants across {pages_fetched} pages")
             return restaurants
 
         except requests.exceptions.RequestException as e:
             logger.error(f"Error in nearby search: {e}")
-            return []
+            return restaurants  # Return what we have so far
 
 
     @staticmethod
