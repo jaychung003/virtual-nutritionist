@@ -8,7 +8,7 @@
 		<true/>
 	</dict>
 	<key>GMSApiKey</key>
-	<string>YOUR_IOS_MAPS_API_KEY_HERE</string>
+	<string>AIzaSyDlQNSNWIsIVYYyFUzMwCqbvtNCiB9qyGc</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Diet Watch needs your location to find nearby restaurants with safe menu options for your dietary needs.</string>
 </dict>
