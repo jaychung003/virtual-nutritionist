@@ -44,7 +44,7 @@ struct RestaurantSearchResult: Codable, Identifiable {
 }
 
 // MARK: - Nearby Result
-struct RestaurantNearbyResult: Codable, Identifiable {
+struct RestaurantNearbyResult: Codable, Identifiable, Equatable {
     let placeId: String
     let name: String
     let vicinity: String

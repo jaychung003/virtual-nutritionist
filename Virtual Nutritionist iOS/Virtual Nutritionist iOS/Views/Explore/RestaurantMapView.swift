@@ -87,12 +87,7 @@ struct RestaurantMapView: UIViewRepresentable {
             return .gray
         }
 
-        let formatter = ISO8601DateFormatter()
-        guard let date = formatter.date(from: lastAnalyzed) else {
-            return .gray
-        }
-
-        let daysSince = Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? 0
+        let daysSince = Calendar.current.dateComponents([.day], from: lastAnalyzed, to: Date()).day ?? 0
 
         if daysSince <= 7 {
             return UIColor(red: 0.2, green: 0.7, blue: 0.3, alpha: 1.0)  // Green - Fresh
@@ -204,11 +199,6 @@ struct RestaurantInfoCard: View {
     }
 
     private func lastAnalyzedDate(for restaurant: RestaurantNearbyResult) -> Date? {
-        guard let lastAnalyzed = restaurant.lastAnalyzed else {
-            return nil
-        }
-
-        let formatter = ISO8601DateFormatter()
-        return formatter.date(from: lastAnalyzed)
+        return restaurant.lastAnalyzed
     }
 }
