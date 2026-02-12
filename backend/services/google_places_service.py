@@ -78,7 +78,8 @@ class GooglePlacesService:
         longitude: float,
         radius_meters: int = 5000,
         cuisine_type: str = None,
-        max_results: int = 60
+        max_results: int = 60,
+        rank_by_distance: bool = True
     ) -> List[Dict]:
         """
         Find restaurants near a location.
@@ -86,12 +87,13 @@ class GooglePlacesService:
         Args:
             latitude: Latitude coordinate
             longitude: Longitude coordinate
-            radius_meters: Search radius in meters (max 50000)
+            radius_meters: Search radius in meters (only used if rank_by_distance=False)
             cuisine_type: Optional cuisine filter (e.g., "italian", "mexican")
             max_results: Maximum number of results to return (default 60)
+            rank_by_distance: If True, rank by distance (closest first). If False, rank by prominence.
 
         Returns:
-            List of restaurant dictionaries
+            List of restaurant dictionaries sorted by distance
         """
         import time
 
@@ -99,10 +101,16 @@ class GooglePlacesService:
 
         params = {
             "location": f"{latitude},{longitude}",
-            "radius": min(radius_meters, 50000),  # Max 50km
             "type": "restaurant",
             "key": GOOGLE_PLACES_API_KEY
         }
+
+        # Google API: rankby=distance and radius are mutually exclusive
+        if rank_by_distance:
+            params["rankby"] = "distance"
+            # When using rankby=distance, we'll filter by radius after getting results
+        else:
+            params["radius"] = min(radius_meters, 50000)  # Max 50km
 
         if cuisine_type:
             params["keyword"] = cuisine_type
@@ -159,6 +167,24 @@ class GooglePlacesService:
                 # Remove pagetoken from params for next iteration
                 if "pagetoken" in params:
                     del params["pagetoken"]
+
+            # If we're ranking by distance, filter by radius after the fact
+            if rank_by_distance and radius_meters:
+                filtered = []
+                for r in restaurants:
+                    distance = calculate_distance(
+                        latitude, longitude,
+                        r["latitude"], r["longitude"]
+                    )
+                    # Only include restaurants within the specified radius
+                    if distance <= radius_meters:
+                        filtered.append(r)
+                    # Stop early if we have enough results
+                    if len(filtered) >= max_results:
+                        break
+
+                logger.info(f"Nearby search returned {len(filtered)} restaurants within {radius_meters}m (filtered from {len(restaurants)} total) across {pages_fetched} pages")
+                return filtered
 
             logger.info(f"Nearby search returned {len(restaurants)} restaurants across {pages_fetched} pages")
             return restaurants
