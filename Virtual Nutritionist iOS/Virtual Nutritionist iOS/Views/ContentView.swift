@@ -181,6 +181,10 @@ struct ScannerHomeView: View {
                         }
                     }
                 )
+                .presentationDetents([.height(500), .large])
+                .presentationDragIndicator(.hidden)  // We have our own drag handle
+                .presentationBackgroundInteraction(.enabled)
+                .presentationBackground(.thinMaterial)
             }
             .sheet(isPresented: $showingResults) {
                 ResultsView(
