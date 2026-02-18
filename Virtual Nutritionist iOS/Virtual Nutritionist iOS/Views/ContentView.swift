@@ -7,49 +7,25 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
+            ScannerHomeView()
+                .tabItem {
+                    Label("Scan", systemImage: "camera.fill")
+                }
+                .tag(0)
+
             if FeatureFlags.exploreEnabled {
                 ExploreView()
                     .tabItem {
                         Label("Explore", systemImage: "magnifyingglass")
                     }
-                    .tag(0)
-
-                ScannerHomeView()
-                    .tabItem {
-                        Label("Scan", systemImage: "camera.fill")
-                    }
                     .tag(1)
-
-                ScanHistoryView()
-                    .tabItem {
-                        Label("History", systemImage: "clock.arrow.circlepath")
-                    }
-                    .tag(2)
-
-                SettingsView()
-                    .tabItem {
-                        Label("Settings", systemImage: "gearshape.fill")
-                    }
-                    .tag(3)
-            } else {
-                ScannerHomeView()
-                    .tabItem {
-                        Label("Scan", systemImage: "camera.fill")
-                    }
-                    .tag(0)
-
-                ScanHistoryView()
-                    .tabItem {
-                        Label("History", systemImage: "clock.arrow.circlepath")
-                    }
-                    .tag(1)
-
-                SettingsView()
-                    .tabItem {
-                        Label("Settings", systemImage: "gearshape.fill")
-                    }
-                    .tag(2)
             }
+
+            ProfileTabView()
+                .tabItem {
+                    Label("Profile", systemImage: "person.circle")
+                }
+                .tag(2)
         }
     }
 }
@@ -73,9 +49,11 @@ struct ScannerHomeView: View {
             VStack(spacing: 24) {
                 // Header
                 VStack(spacing: 8) {
-                    Image(systemName: "leaf.circle.fill")
-                        .font(.system(size: 80))
-                        .foregroundStyle(.green)
+                    Image("AppIcon")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 80, height: 80)
+                        .cornerRadius(18)
                     
                     Text("Diet Watch")
                         .font(.largeTitle)
@@ -92,44 +70,55 @@ struct ScannerHomeView: View {
                 Spacer()
                 
                 // Selected protocols display
-                if !userProfile.selectedProtocols.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Active Protocols")
-                            .font(.headline)
-                        
-                        FlowLayout(spacing: 8) {
-                            ForEach(userProfile.selectedProtocols, id: \.self) { protocolId in
-                                ProtocolTag(protocolId: protocolId)
+                Button(action: {
+                    showingProfile = true
+                }) {
+                    if !userProfile.selectedProtocols.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("My Protocols")
+                                .font(.headline)
+                                .foregroundStyle(.primary)
+
+                            FlowLayout(spacing: 8) {
+                                ForEach(userProfile.selectedProtocols, id: \.self) { protocolId in
+                                    ProtocolTag(protocolId: protocolId)
+                                }
                             }
                         }
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+                    } else {
+                        VStack(spacing: 12) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.title)
+                                .foregroundStyle(.orange)
+
+                            Text("No dietary protocols selected")
+                                .font(.headline)
+                                .foregroundStyle(.primary)
+
+                            Text("Tap here to select your dietary restrictions")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
                     }
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-                    .padding(.horizontal)
-                } else {
-                    VStack(spacing: 12) {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.title)
-                            .foregroundStyle(.orange)
-                        
-                        Text("No dietary protocols selected")
-                            .font(.headline)
-                        
-                        Text("Tap the settings icon to select your dietary restrictions")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-                    .padding(.horizontal)
                 }
+                .buttonStyle(.plain)
                 
                 Spacer()
-                
+
+                // How It Works
+                InfoBox()
+                    .padding(.horizontal)
+
                 // Scan button
                 Button(action: {
                     showingCamera = true
@@ -151,16 +140,6 @@ struct ScannerHomeView: View {
                 .padding(.bottom, 32)
             }
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        showingProfile = true
-                    }) {
-                        Image(systemName: "gearshape.fill")
-                            .foregroundStyle(.primary)
-                    }
-                }
-            }
             .sheet(isPresented: $showingCamera) {
                 CameraView(capturedImage: $capturedImage)
             }
@@ -399,7 +378,7 @@ struct FlowLayout: Layout {
     }
 }
 
-struct SettingsView: View {
+struct ProfileTabView: View {
     @EnvironmentObject var userProfile: UserProfile
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var showingProfile = false
@@ -422,7 +401,7 @@ struct SettingsView: View {
                 }
 
                 // Dietary protocols
-                Section(header: Text("Dietary Protocols")) {
+                Section(header: Text("My Protocols")) {
                     Button(action: {
                         showingProfile = true
                     }) {
@@ -440,6 +419,9 @@ struct SettingsView: View {
 
                 // My Data section
                 Section(header: Text("My Data")) {
+                    NavigationLink(destination: ScanHistoryView()) {
+                        Label("Scan History", systemImage: "clock.arrow.circlepath")
+                    }
                     NavigationLink(destination: BookmarksView()) {
                         Label("Bookmarks", systemImage: "bookmark.fill")
                     }
@@ -463,7 +445,7 @@ struct SettingsView: View {
                     }
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle("Profile")
             .sheet(isPresented: $showingProfile) {
                 ProfileView()
             }

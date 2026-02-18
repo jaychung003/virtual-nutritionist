@@ -15,7 +15,7 @@ struct ProfileView: View {
                             .font(.system(size: 60))
                             .foregroundStyle(.green)
                         
-                        Text("Your Dietary Protocols")
+                        Text("My Protocols")
                             .font(.title2)
                             .fontWeight(.bold)
                         
