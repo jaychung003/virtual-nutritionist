@@ -29,7 +29,10 @@
       "Bash(brew services start:*)",
       "Bash(grep:*)",
       "Bash(git -C \"/Users/jaychung/Virtual Nutritionist\" branch -a)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(\"/Users/jaychung/Virtual Nutritionist/Virtual Nutritionist iOS/Virtual-Nutritionist-iOS-Info.plist\" << 'EOF'\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n\t<key>NSAppTransportSecurity</key>\n\t<dict>\n\t\t<key>NSAllowsLocalNetworking</key>\n\t\t<true/>\n\t</dict>\n\t<key>GMSApiKey</key>\n\t<string>YOUR_GOOGLE_MAPS_API_KEY_HERE</string>\n\t<key>NSLocationWhenInUseUsageDescription</key>\n\t<string>Diet Watch needs your location to find nearby restaurants with safe menu options for your dietary needs.</string>\n</dict>\n</plist>\nEOF)",
+      "Bash(git status:*)",
+      "Bash(chmod:*)"
     ]
   }
 }

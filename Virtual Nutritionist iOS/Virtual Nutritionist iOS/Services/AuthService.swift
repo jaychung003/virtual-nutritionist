@@ -33,8 +33,7 @@ enum AuthError: LocalizedError {
 class AuthService {
     static let shared = AuthService()
 
-    // TODO: Replace <EC2_PUBLIC_IP> with your actual EC2 instance IP address
-    private let baseURL = "http://<EC2_PUBLIC_IP>"
+    private let baseURL = "http://52.12.190.32"
     private let keychain = KeychainService.shared
 
     private init() {}

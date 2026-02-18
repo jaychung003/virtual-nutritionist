@@ -6,8 +6,7 @@ class APIService {
     static let shared = APIService()
 
     /// Production backend on Render. Use a different URL for local/simulator if needed.
-    // TODO: Replace <EC2_PUBLIC_IP> with your actual EC2 instance IP address
-    private let baseURL = "http://<EC2_PUBLIC_IP>"
+    private let baseURL = "http://52.12.190.32"
     private let keychain = KeychainService.shared
     private let authService = AuthService.shared
 
