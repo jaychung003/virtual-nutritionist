@@ -33,7 +33,8 @@ enum AuthError: LocalizedError {
 class AuthService {
     static let shared = AuthService()
 
-    private let baseURL = "https://virtual-nutritionist-1upi.onrender.com"
+    // TODO: Replace <EC2_PUBLIC_IP> with your actual EC2 instance IP address
+    private let baseURL = "http://<EC2_PUBLIC_IP>"
     private let keychain = KeychainService.shared
 
     private init() {}
