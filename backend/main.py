@@ -234,19 +234,24 @@ async def analyze_menu(
     try:
         menu_items = await analyze_menu_image(request.image, request.protocols, triggers)
 
-        # Save to scan history if user is authenticated
-        if current_user:
-            scan_record = ScanHistory(
-                user_id=current_user.id,
-                protocols_used=request.protocols,
-                menu_items=menu_items,  # Already a list of dicts from vision service
-                restaurant_name=None,  # Could be extracted from image or added to request
-                image_data=request.image  # Save the base64 encoded image
-            )
-            db.add(scan_record)
-            db.commit()
+        response = AnalyzeMenuResponse(menu_items=menu_items)
 
-        return AnalyzeMenuResponse(menu_items=menu_items)
+        # Save to scan history if user is authenticated (non-blocking)
+        if current_user:
+            try:
+                scan_record = ScanHistory(
+                    user_id=current_user.id,
+                    protocols_used=request.protocols,
+                    menu_items=menu_items,
+                    restaurant_name=None,
+                    image_data=None,
+                )
+                db.add(scan_record)
+                db.commit()
+            except Exception:
+                db.rollback()
+
+        return response
     except Exception as e:
         raise HTTPException(
             status_code=500,

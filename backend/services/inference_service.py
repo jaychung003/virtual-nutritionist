@@ -4,22 +4,16 @@ Inference service for loading and managing dietary protocol triggers.
 
 import json
 import os
+from functools import lru_cache
 from typing import Dict, List, Set
 
 # Path to protocol data files
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
 
 
-def load_protocol_triggers(protocols: List[str]) -> Dict[str, any]:
-    """
-    Load trigger data for the specified dietary protocols.
-    
-    Args:
-        protocols: List of protocol IDs (e.g., ["low_fodmap", "scd"])
-        
-    Returns:
-        Dictionary containing combined trigger information
-    """
+@lru_cache(maxsize=32)
+def _load_protocol_file(protocol: str) -> dict:
+    """Load and cache a single protocol JSON file."""
     protocol_files = {
         "low_fodmap": "fodmap_triggers.json",
         "scd": "scd_triggers.json",
@@ -40,7 +34,23 @@ def load_protocol_triggers(protocols: List[str]) -> Dict[str, any]:
         "keto": "keto_triggers.json",
         "low_histamine": "low_histamine_triggers.json"
     }
+    if protocol not in protocol_files:
+        return None
+    file_path = os.path.join(DATA_DIR, protocol_files[protocol])
+    with open(file_path, "r") as f:
+        return json.load(f)
+
+
+def load_protocol_triggers(protocols: List[str]) -> Dict[str, any]:
+    """
+    Load trigger data for the specified dietary protocols.
     
+    Args:
+        protocols: List of protocol IDs (e.g., ["low_fodmap", "scd"])
+        
+    Returns:
+        Dictionary containing combined trigger information
+    """
     combined_triggers = {
         "protocols": [],
         "all_triggers": set(),
@@ -48,16 +58,12 @@ def load_protocol_triggers(protocols: List[str]) -> Dict[str, any]:
         "safe_alternatives": set(),
         "detailed_triggers": {}
     }
-    
+
     for protocol in protocols:
-        if protocol not in protocol_files:
-            continue
-            
-        file_path = os.path.join(DATA_DIR, protocol_files[protocol])
-        
         try:
-            with open(file_path, "r") as f:
-                data = json.load(f)
+            data = _load_protocol_file(protocol)
+            if data is None:
+                continue
                 
             combined_triggers["protocols"].append({
                 "id": data.get("protocol_id"),
