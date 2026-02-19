@@ -34,28 +34,35 @@ class CameraService {
         }
     }
     
-    /// Compress image for upload
+    /// Compress image for upload using binary search for fast convergence
     func compressImage(_ image: UIImage, maxSizeKB: Int = 1024) -> Data? {
-        var compression: CGFloat = 1.0
         let maxBytes = maxSizeKB * 1024
-        
-        guard var imageData = image.jpegData(compressionQuality: compression) else {
-            return nil
-        }
-        
-        // Reduce compression until size is acceptable
-        while imageData.count > maxBytes && compression > 0.1 {
-            compression -= 0.1
-            if let newData = image.jpegData(compressionQuality: compression) {
-                imageData = newData
+
+        // Try target quality first — often good enough in one shot
+        guard let firstTry = image.jpegData(compressionQuality: 0.6) else { return nil }
+        if firstTry.count <= maxBytes { return firstTry }
+
+        // Binary search: converge in ~4 iterations instead of up to 9
+        var lo: CGFloat = 0.1
+        var hi: CGFloat = 0.6
+        var best = firstTry
+
+        for _ in 0..<4 {
+            let mid = (lo + hi) / 2
+            guard let data = image.jpegData(compressionQuality: mid) else { break }
+            if data.count <= maxBytes {
+                best = data
+                lo = mid
+            } else {
+                hi = mid
             }
         }
-        
-        return imageData
+
+        return best
     }
     
     /// Resize image to a maximum dimension while maintaining aspect ratio
-    func resizeImage(_ image: UIImage, maxDimension: CGFloat = 1920) -> UIImage {
+    func resizeImage(_ image: UIImage, maxDimension: CGFloat = 1280) -> UIImage {
         let size = image.size
         
         guard size.width > maxDimension || size.height > maxDimension else {

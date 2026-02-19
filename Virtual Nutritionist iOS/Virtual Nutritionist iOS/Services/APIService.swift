@@ -139,8 +139,8 @@ class APIService {
     /// - Returns: Array of analyzed menu items
     func analyzeMenu(image: UIImage, protocols: [String]) async throws -> [MenuItem] {
         // Prepare image
-        let resizedImage = CameraService.shared.resizeImage(image, maxDimension: 1920)
-        guard let imageData = CameraService.shared.compressImage(resizedImage, maxSizeKB: 2048) else {
+        let resizedImage = CameraService.shared.resizeImage(image, maxDimension: 1280)
+        guard let imageData = CameraService.shared.compressImage(resizedImage, maxSizeKB: 500) else {
             throw APIError.imageProcessingFailed
         }
 
@@ -378,8 +378,8 @@ class APIService {
         protocols: [String]
     ) async throws -> AnalyzeMenuResponse {
         // Prepare image
-        let resizedImage = CameraService.shared.resizeImage(image, maxDimension: 1920)
-        guard let imageData = CameraService.shared.compressImage(resizedImage, maxSizeKB: 2048) else {
+        let resizedImage = CameraService.shared.resizeImage(image, maxDimension: 1280)
+        guard let imageData = CameraService.shared.compressImage(resizedImage, maxSizeKB: 500) else {
             throw APIError.imageProcessingFailed
         }
 

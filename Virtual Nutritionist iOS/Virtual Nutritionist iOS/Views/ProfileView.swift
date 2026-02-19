@@ -163,6 +163,7 @@ struct InfoRow: View {
             Text(text)
                 .font(.subheadline)
                 .foregroundStyle(.primary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
