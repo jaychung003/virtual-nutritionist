@@ -35,7 +35,6 @@ class GooglePlacesService:
 
         params = {
             "query": search_query,
-            "type": "restaurant",
             "key": GOOGLE_PLACES_API_KEY
         }
 
@@ -78,120 +77,105 @@ class GooglePlacesService:
         longitude: float,
         radius_meters: int = 5000,
         cuisine_type: str = None,
-        max_results: int = 60,
+        max_results: int = 20,
         rank_by_distance: bool = True
     ) -> List[Dict]:
         """
-        Find restaurants near a location.
+        Find restaurants and food venues near a location using Places API v2.
 
         Args:
             latitude: Latitude coordinate
             longitude: Longitude coordinate
-            radius_meters: Search radius in meters (only used if rank_by_distance=False)
+            radius_meters: Search radius in meters (max 50000)
             cuisine_type: Optional cuisine filter (e.g., "italian", "mexican")
-            max_results: Maximum number of results to return (default 60)
-            rank_by_distance: If True, rank by distance (closest first). If False, rank by prominence.
+            max_results: Maximum number of results (max 20 for v2 API)
+            rank_by_distance: If True, rank by distance (closest first).
 
         Returns:
             List of restaurant dictionaries sorted by distance
         """
-        import time
+        url = "https://places.googleapis.com/v1/places:searchNearby"
 
-        url = f"{BASE_URL}/nearbysearch/json"
-
-        params = {
-            "location": f"{latitude},{longitude}",
-            "type": "restaurant",
-            "key": GOOGLE_PLACES_API_KEY
+        headers = {
+            "Content-Type": "application/json",
+            "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY,
+            "X-Goog-FieldMask": ",".join([
+                "places.id",
+                "places.displayName",
+                "places.shortFormattedAddress",
+                "places.location",
+                "places.rating",
+                "places.userRatingCount",
+                "places.priceLevel",
+                "places.types",
+                "places.businessStatus",
+                "places.photos",
+                "places.currentOpeningHours.openNow",
+            ])
         }
 
-        # Google API: rankby=distance and radius are mutually exclusive
-        if rank_by_distance:
-            params["rankby"] = "distance"
-            # When using rankby=distance, we'll filter by radius after getting results
-        else:
-            params["radius"] = min(radius_meters, 50000)  # Max 50km
+        body = {
+            "includedTypes": [
+                "restaurant", "cafe", "bar",
+                "bakery", "meal_takeaway", "meal_delivery"
+            ],
+            "maxResultCount": min(max_results, 20),
+            "rankPreference": "DISTANCE" if rank_by_distance else "POPULARITY",
+            "locationRestriction": {
+                "circle": {
+                    "center": {
+                        "latitude": latitude,
+                        "longitude": longitude
+                    },
+                    "radius": float(min(radius_meters, 50000))
+                }
+            }
+        }
 
         if cuisine_type:
-            params["keyword"] = cuisine_type
-
-        restaurants = []
-        next_page_token = None
-        pages_fetched = 0
-        max_pages = 3  # Google allows up to 60 results (3 pages of 20)
+            body["languageCode"] = "en"
+            # Use text restriction for cuisine filtering
+            body["includedTypes"] = [cuisine_type] if cuisine_type in body["includedTypes"] else body["includedTypes"]
 
         try:
-            while pages_fetched < max_pages and len(restaurants) < max_results:
-                # Add page token if we have one
-                if next_page_token:
-                    params["pagetoken"] = next_page_token
-                    # Google requires a short delay before using page token
-                    time.sleep(2)
+            response = requests.post(url, headers=headers, json=body, timeout=10)
+            response.raise_for_status()
+            data = response.json()
 
-                response = requests.get(url, params=params, timeout=10)
-                response.raise_for_status()
-                data = response.json()
+            restaurants = []
+            for place in data.get("places", []):
+                # Map v2 priceLevel string to integer (0-4)
+                price_level_map = {
+                    "PRICE_LEVEL_FREE": 0,
+                    "PRICE_LEVEL_INEXPENSIVE": 1,
+                    "PRICE_LEVEL_MODERATE": 2,
+                    "PRICE_LEVEL_EXPENSIVE": 3,
+                    "PRICE_LEVEL_VERY_EXPENSIVE": 4,
+                }
+                price_str = place.get("priceLevel")
+                price_level = price_level_map.get(price_str)
 
-                if data["status"] not in ["OK", "ZERO_RESULTS"]:
-                    logger.warning(f"Nearby search returned status: {data['status']}")
-                    break
+                restaurants.append({
+                    "place_id": place.get("id"),
+                    "name": place.get("displayName", {}).get("text", ""),
+                    "vicinity": place.get("shortFormattedAddress", ""),
+                    "latitude": place.get("location", {}).get("latitude"),
+                    "longitude": place.get("location", {}).get("longitude"),
+                    "rating": place.get("rating"),
+                    "user_ratings_total": place.get("userRatingCount"),
+                    "price_level": price_level,
+                    "types": place.get("types", []),
+                    "business_status": place.get("businessStatus"),
+                    "photos_available": len(place.get("photos", [])) > 0,
+                    "is_open": place.get("currentOpeningHours", {}).get("openNow")
+                })
 
-                # Process results
-                for place in data.get("results", []):
-                    if len(restaurants) >= max_results:
-                        break
-
-                    restaurants.append({
-                        "place_id": place["place_id"],
-                        "name": place["name"],
-                        "vicinity": place.get("vicinity"),  # Shorter address
-                        "latitude": place["geometry"]["location"]["lat"],
-                        "longitude": place["geometry"]["location"]["lng"],
-                        "rating": place.get("rating"),
-                        "user_ratings_total": place.get("user_ratings_total"),
-                        "price_level": place.get("price_level"),
-                        "types": place.get("types", []),
-                        "business_status": place.get("business_status"),
-                        "photos_available": len(place.get("photos", [])) > 0,
-                        "is_open": place.get("opening_hours", {}).get("open_now")
-                    })
-
-                # Check for more pages
-                next_page_token = data.get("next_page_token")
-                pages_fetched += 1
-
-                # Stop if no more pages
-                if not next_page_token:
-                    break
-
-                # Remove pagetoken from params for next iteration
-                if "pagetoken" in params:
-                    del params["pagetoken"]
-
-            # If we're ranking by distance, filter by radius after the fact
-            if rank_by_distance and radius_meters:
-                filtered = []
-                for r in restaurants:
-                    distance = calculate_distance(
-                        latitude, longitude,
-                        r["latitude"], r["longitude"]
-                    )
-                    # Only include restaurants within the specified radius
-                    if distance <= radius_meters:
-                        filtered.append(r)
-                    # Stop early if we have enough results
-                    if len(filtered) >= max_results:
-                        break
-
-                logger.info(f"Nearby search returned {len(filtered)} restaurants within {radius_meters}m (filtered from {len(restaurants)} total) across {pages_fetched} pages")
-                return filtered
-
-            logger.info(f"Nearby search returned {len(restaurants)} restaurants across {pages_fetched} pages")
+            logger.info(f"Nearby search (v2) returned {len(restaurants)} places within {radius_meters}m")
             return restaurants
 
         except requests.exceptions.RequestException as e:
             logger.error(f"Error in nearby search: {e}")
-            return restaurants  # Return what we have so far
+            return []
 
 
     @staticmethod

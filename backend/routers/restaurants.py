@@ -118,7 +118,7 @@ async def get_nearby_restaurants(
     radius_meters: int = Query(default=5000, le=50000),
     cuisine_type: Optional[str] = None,
     protocols: List[str] = Query(default=[]),
-    limit: int = Query(default=15, le=60, description="Max restaurants to return"),
+    limit: int = Query(default=15, le=20, description="Max restaurants to return"),
     db: Session = Depends(get_db)
 ):
     """
@@ -129,7 +129,7 @@ async def get_nearby_restaurants(
     - **radius_meters**: Search radius in meters (max 50000)
     - **cuisine_type**: Optional cuisine filter
     - **protocols**: Dietary protocols to check (for safety counts)
-    - **limit**: Maximum number of restaurants to return (default 15, max 60)
+    - **limit**: Maximum number of restaurants to return (default 15, max 20)
 
     Returns nearby restaurants with analysis status and safety info.
     """
