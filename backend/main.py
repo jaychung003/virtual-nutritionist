@@ -14,7 +14,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy.orm import Session
 
-from services.vision_service import analyze_menu_image
+from services.vision_service import analyze_menu_images
 from services.inference_service import load_protocol_triggers
 from db.session import get_db
 from db.models import User, ScanHistory
@@ -52,7 +52,8 @@ app.include_router(restaurants.router)
 
 class AnalyzeMenuRequest(BaseModel):
     """Request model for menu analysis."""
-    image: str  # Base64 encoded image
+    image: Optional[str] = None  # Base64 encoded image (single, backward compat)
+    images: Optional[List[str]] = None  # Multiple base64 encoded images
     protocols: List[str]  # e.g., ["low_fodmap", "scd"]
 
 
@@ -230,9 +231,16 @@ async def analyze_menu(
     # Load trigger data for selected protocols
     triggers = load_protocol_triggers(request.protocols)
 
-    # Analyze the menu image
+    # Normalize to list of images
+    image_list = request.images or ([request.image] if request.image else [])
+    if not image_list:
+        raise HTTPException(status_code=400, detail="At least one image is required")
+    if len(image_list) > 5:
+        raise HTTPException(status_code=400, detail="Maximum 5 images allowed")
+
+    # Analyze the menu image(s)
     try:
-        menu_items = await analyze_menu_image(request.image, request.protocols, triggers)
+        menu_items = await analyze_menu_images(image_list, request.protocols, triggers)
 
         response = AnalyzeMenuResponse(menu_items=menu_items)
 

@@ -15,7 +15,7 @@ from services.google_places_service import (
     calculate_distance,
     get_cuisine_type
 )
-from services.vision_service import analyze_menu_image
+from services.vision_service import analyze_menu_images
 from services.inference_service import load_protocol_triggers
 
 router = APIRouter(prefix="/restaurants", tags=["Restaurants"])
@@ -277,7 +277,8 @@ async def get_restaurant_photo(
 
 
 class AnalyzeMenuRequest(BaseModel):
-    image: str  # base64 encoded image
+    image: Optional[str] = None  # base64 encoded image (single, backward compat)
+    images: Optional[List[str]] = None  # multiple base64 encoded images
     protocols: List[str]
 
 
@@ -401,18 +402,18 @@ async def analyze_restaurant_menu(
     if not details:
         raise HTTPException(status_code=404, detail="Restaurant not found on Google Places")
 
-    # Validate image is provided
-    if not request.image:
-        raise HTTPException(
-            status_code=400,
-            detail="Menu image is required"
-        )
+    # Normalize to list of images
+    image_list = request.images or ([request.image] if request.image else [])
+    if not image_list:
+        raise HTTPException(status_code=400, detail="At least one menu image is required")
+    if len(image_list) > 5:
+        raise HTTPException(status_code=400, detail="Maximum 5 images allowed")
 
     # Load protocol triggers
     triggers = load_protocol_triggers(request.protocols)
 
-    # Analyze the user-provided menu photo
-    menu_items = await analyze_menu_image(request.image, request.protocols, triggers)
+    # Analyze the user-provided menu photo(s)
+    menu_items = await analyze_menu_images(image_list, request.protocols, triggers)
 
     # Save to database (community-contributed)
     existing = db.query(Restaurant).filter(

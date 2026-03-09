@@ -4,42 +4,58 @@ Vision service for analyzing menu images using Claude Vision API.
 
 import os
 import json
-import base64
 import anthropic
 from typing import Dict, List
 
 from services.inference_service import format_triggers_for_prompt
 
 
-async def analyze_menu_image(
-    image_base64: str,
+def _detect_media_type(image_base64: str) -> str:
+    """Detect image media type from base64 prefix."""
+    if image_base64.startswith("/9j/"):
+        return "image/jpeg"
+    elif image_base64.startswith("iVBOR"):
+        return "image/png"
+    elif image_base64.startswith("R0lGOD"):
+        return "image/gif"
+    elif image_base64.startswith("UklGR"):
+        return "image/webp"
+    return "image/jpeg"
+
+
+async def analyze_menu_images(
+    images_base64: List[str],
     protocols: List[str],
     triggers: Dict
 ) -> List[Dict]:
     """
-    Analyze a menu image using Claude Vision API.
-    
+    Analyze one or more menu images using Claude Vision API.
+
     Args:
-        image_base64: Base64 encoded image data
+        images_base64: List of base64 encoded image data
         protocols: List of dietary protocols to check against
         triggers: Combined trigger data from protocols
-        
+
     Returns:
         List of menu items with safety ratings
     """
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-    
+
     # Format triggers for the prompt
     trigger_context = format_triggers_for_prompt(triggers)
-    
+
+    image_count = len(images_base64)
+    plural = "images" if image_count > 1 else "image"
+
     # Build the analysis prompt
     system_prompt = """You are a dietary analysis assistant helping IBD (Inflammatory Bowel Disease) patients identify safe menu items at restaurants.
 
 Your task is to:
-1. Extract all menu items from the provided image
+1. Extract all menu items from the provided menu {plural}
 2. For each item, infer the likely ingredients based on common restaurant preparation methods
 3. Check each item against the user's dietary restrictions
 4. Provide a safety rating and explanation
+5. If multiple images are provided, they may show different pages of the same menu. Deduplicate any items that appear in more than one photo.
 
 IMPORTANT GUIDELINES:
 - Be CONSERVATIVE in your assessments. When uncertain, flag as "caution" rather than "safe"
@@ -54,9 +70,9 @@ SAFETY RATINGS:
 - "caution": Item may contain trigger ingredients or preparation is uncertain
 - "avoid": Item clearly contains one or more trigger ingredients
 
-You must respond with valid JSON only, no additional text."""
+You must respond with valid JSON only, no additional text.""".format(plural=plural)
 
-    user_prompt = f"""Analyze this restaurant menu image for a patient following these dietary protocols: {', '.join(protocols)}
+    user_prompt = f"""Analyze {"these" if image_count > 1 else "this"} restaurant menu {plural} for a patient following these dietary protocols: {', '.join(protocols)}
 
 {trigger_context}
 
@@ -80,53 +96,46 @@ If you cannot read the menu or extract items, return:
 
 Analyze the menu now:"""
 
-    # Determine image media type (default to jpeg)
-    media_type = "image/jpeg"
-    if image_base64.startswith("/9j/"):
-        media_type = "image/jpeg"
-    elif image_base64.startswith("iVBOR"):
-        media_type = "image/png"
-    elif image_base64.startswith("R0lGOD"):
-        media_type = "image/gif"
-    elif image_base64.startswith("UklGR"):
-        media_type = "image/webp"
-    
+    # Build content blocks: all images first, then the text prompt
+    content_blocks = []
+    for img_b64 in images_base64:
+        media_type = _detect_media_type(img_b64)
+        content_blocks.append({
+            "type": "image",
+            "source": {
+                "type": "base64",
+                "media_type": media_type,
+                "data": img_b64
+            }
+        })
+    content_blocks.append({
+        "type": "text",
+        "text": user_prompt
+    })
+
     # Call Claude Vision API
     message = client.messages.create(
         model="claude-sonnet-4-20250514",
-        max_tokens=4096,
+        max_tokens=8192,
         messages=[
             {
                 "role": "user",
-                "content": [
-                    {
-                        "type": "image",
-                        "source": {
-                            "type": "base64",
-                            "media_type": media_type,
-                            "data": image_base64
-                        }
-                    },
-                    {
-                        "type": "text",
-                        "text": user_prompt
-                    }
-                ]
+                "content": content_blocks
             }
         ],
         system=system_prompt
     )
-    
+
     # Parse the response
     response_text = message.content[0].text
-    
+
     # Clean up response if needed (remove markdown code blocks if present)
     if response_text.startswith("```"):
         lines = response_text.split("\n")
         # Remove first and last lines (```json and ```)
         lines = [l for l in lines if not l.startswith("```")]
         response_text = "\n".join(lines)
-    
+
     try:
         result = json.loads(response_text)
         return result.get("menu_items", [])
@@ -138,3 +147,12 @@ Analyze the menu now:"""
             "triggers": [],
             "notes": f"Could not parse menu analysis. Please try again with a clearer image. Error: {str(e)}"
         }]
+
+
+async def analyze_menu_image(
+    image_base64: str,
+    protocols: List[str],
+    triggers: Dict
+) -> List[Dict]:
+    """Backward-compatible wrapper for single image analysis."""
+    return await analyze_menu_images([image_base64], protocols, triggers)
