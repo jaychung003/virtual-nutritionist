@@ -35,12 +35,20 @@ struct ResultsView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Summary header
-                SummaryHeader(
-                    safeCount: safeCount,
-                    cautionCount: cautionCount,
-                    avoidCount: avoidCount
-                )
+                // Combined header with summary stats and filters
+                VStack(spacing: 0) {
+                    // Summary header with emojis
+                    SummaryHeader(
+                        safeCount: safeCount,
+                        cautionCount: cautionCount,
+                        avoidCount: avoidCount,
+                        selectedFilter: $selectedFilter
+                    )
+
+                    // Filter chips (all options in one row)
+                    FilterTabs(selectedFilter: $selectedFilter)
+                }
+                .background(Color(.systemGray6))
 
                 // AI Disclaimer Banner
                 AIDisclaimerBanner()
@@ -56,9 +64,6 @@ struct ResultsView: View {
                     .frame(maxWidth: .infinity)
                     .background(Color.green)
                 }
-
-                // Filter tabs
-                FilterTabs(selectedFilter: $selectedFilter)
                 
                 // Results list
                 if filteredItems.isEmpty {
@@ -119,11 +124,12 @@ struct AIDisclaimerBanner: View {
     }
 }
 
-/// Summary statistics header
+/// Summary statistics header with clickable filters
 struct SummaryHeader: View {
     let safeCount: Int
     let cautionCount: Int
     let avoidCount: Int
+    @Binding var selectedFilter: ResultsView.SafetyFilter
 
     var body: some View {
         HStack(spacing: 0) {
@@ -131,27 +137,33 @@ struct SummaryHeader: View {
                 count: safeCount,
                 label: "Safe",
                 color: .green,
-                icon: "checkmark.circle.fill"
+                icon: "checkmark.circle.fill",
+                isSelected: selectedFilter == .safe,
+                action: { selectedFilter = .safe }
             )
-            
+
             Divider()
                 .frame(height: 40)
-            
+
             SummaryItem(
                 count: cautionCount,
                 label: "Caution",
                 color: .orange,
-                icon: "exclamationmark.triangle.fill"
+                icon: "exclamationmark.triangle.fill",
+                isSelected: selectedFilter == .caution,
+                action: { selectedFilter = .caution }
             )
-            
+
             Divider()
                 .frame(height: 40)
-            
+
             SummaryItem(
                 count: avoidCount,
                 label: "Avoid",
                 color: .red,
-                icon: "xmark.circle.fill"
+                icon: "xmark.circle.fill",
+                isSelected: selectedFilter == .avoid,
+                action: { selectedFilter = .avoid }
             )
         }
         .padding(.vertical, 16)
@@ -164,49 +176,56 @@ struct SummaryItem: View {
     let label: String
     let color: Color
     let icon: String
-    
+    let isSelected: Bool
+    let action: () -> Void
+
     var body: some View {
-        VStack(spacing: 4) {
-            HStack(spacing: 4) {
-                Image(systemName: icon)
-                    .foregroundStyle(color)
-                Text("\(count)")
-                    .font(.title2)
-                    .fontWeight(.bold)
+        Button(action: action) {
+            VStack(spacing: 4) {
+                HStack(spacing: 4) {
+                    Image(systemName: icon)
+                        .foregroundStyle(color)
+                    Text("\(count)")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                }
+                Text(label)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 4)
+            .background(isSelected ? color.opacity(0.15) : Color.clear)
+            .cornerRadius(8)
         }
-        .frame(maxWidth: .infinity)
+        .buttonStyle(.plain)
     }
 }
 
 /// Filter tabs for safety categories
 struct FilterTabs: View {
     @Binding var selectedFilter: ResultsView.SafetyFilter
-    
+
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(ResultsView.SafetyFilter.allCases, id: \.self) { filter in
-                    FilterChip(
-                        title: filter.rawValue,
-                        isSelected: selectedFilter == filter,
-                        color: colorForFilter(filter)
-                    ) {
-                        withAnimation(.spring(response: 0.3)) {
-                            selectedFilter = filter
-                        }
+        HStack(spacing: 8) {
+            ForEach(ResultsView.SafetyFilter.allCases, id: \.self) { filter in
+                FilterChip(
+                    title: filter.rawValue,
+                    isSelected: selectedFilter == filter,
+                    color: colorForFilter(filter)
+                ) {
+                    withAnimation(.spring(response: 0.3)) {
+                        selectedFilter = filter
                     }
                 }
             }
-            .padding(.horizontal)
-            .padding(.vertical, 12)
+            Spacer()
         }
-        .background(Color(.systemBackground))
+        .padding(.horizontal)
+        .padding(.vertical, 10)
     }
-    
+
     func colorForFilter(_ filter: ResultsView.SafetyFilter) -> Color {
         switch filter {
         case .all: return .blue
@@ -222,17 +241,21 @@ struct FilterChip: View {
     let isSelected: Bool
     let color: Color
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             Text(title)
                 .font(.subheadline)
                 .fontWeight(isSelected ? .semibold : .regular)
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .background(isSelected ? color.opacity(0.2) : Color(.systemGray6))
-                .foregroundStyle(isSelected ? color : .secondary)
-                .cornerRadius(20)
+                .background(isSelected ? color : Color(.systemBackground))
+                .foregroundStyle(isSelected ? .white : color)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(color, lineWidth: isSelected ? 0 : 1.5)
+                )
+                .cornerRadius(18)
         }
         .buttonStyle(.plain)
     }
@@ -268,32 +291,45 @@ struct MenuItemCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Header row
-            Button(action: {
-                withAnimation(.spring(response: 0.3)) {
-                    isExpanded.toggle()
-                }
-            }) {
-                HStack(alignment: .center, spacing: 12) {
-                    // Safety indicator
-                    Image(systemName: safetyIcon)
-                        .font(.title2)
-                        .foregroundStyle(safetyColor)
-                    
-                    // Item name
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(item.name)
-                            .font(.headline)
-                            .foregroundStyle(.primary)
-                            .multilineTextAlignment(.leading)
-                        
-                        Text(item.safety.displayName)
-                            .font(.caption)
+            ZStack(alignment: .trailing) {
+                // Tap area for expansion (everything except bookmark button)
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack(alignment: .center, spacing: 12) {
+                        // Safety indicator
+                        Image(systemName: safetyIcon)
+                            .font(.title2)
                             .foregroundStyle(safetyColor)
-                    }
-                    
-                    Spacer()
 
-                    // Bookmark button
+                        // Item name
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(item.name)
+                                .font(.headline)
+                                .foregroundStyle(.primary)
+                                .multilineTextAlignment(.leading)
+
+                            Text(item.safety.displayName)
+                                .font(.caption)
+                                .foregroundStyle(safetyColor)
+                        }
+
+                        Spacer()
+
+                        // Expand/collapse chevron
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(16)
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation(.spring(response: 0.3)) {
+                        isExpanded.toggle()
+                    }
+                }
+
+                // Bookmark button (highest priority) - only shown if feature enabled
+                if FeatureFlags.bookmarksEnabled {
                     Button(action: {
                         handleBookmark()
                     }) {
@@ -301,15 +337,9 @@ struct MenuItemCard: View {
                             .foregroundStyle(isBookmarked ? .yellow : .secondary)
                     }
                     .buttonStyle(.plain)
-
-                    // Expand/collapse chevron
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    .padding(16)
                 }
-                .padding(16)
             }
-            .buttonStyle(.plain)
             .alert("Sign In Required", isPresented: $showingBookmarkAlert) {
                 Button("OK", role: .cancel) {}
             } message: {

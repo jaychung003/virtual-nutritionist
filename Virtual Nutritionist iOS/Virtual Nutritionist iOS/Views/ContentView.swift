@@ -36,7 +36,7 @@ struct ScannerHomeView: View {
     @State private var showingResults = false
     @State private var showingProfile = false
     @State private var showingRestaurantSearch = false  // NEW
-    @State private var capturedImage: UIImage?
+    @State private var capturedImages: [UIImage] = []
     @State private var selectedRestaurant: (placeId: String, name: String)?  // NEW
     @State private var analysisResults: [MenuItem] = []
     @State private var contributionMessage: String?  // NEW
@@ -141,7 +141,7 @@ struct ScannerHomeView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showingCamera) {
-                CameraView(capturedImage: $capturedImage)
+                CameraView(capturedImages: $capturedImages)
             }
             .sheet(isPresented: $showingProfile) {
                 ProfileView()
@@ -150,20 +150,18 @@ struct ScannerHomeView: View {
                 RestaurantSearchSheet(
                     onSelect: { placeId, name in
                         selectedRestaurant = (placeId, name)
-                        if let image = capturedImage {
-                            analyzeWithRestaurant(image, placeId: placeId, name: name)
+                        if !capturedImages.isEmpty {
+                            analyzeWithRestaurant(capturedImages, placeId: placeId, name: name)
                         }
                     },
                     onSkip: {
-                        if let image = capturedImage {
-                            analyzeAnonymously(image)
+                        if !capturedImages.isEmpty {
+                            analyzeAnonymously(capturedImages)
                         }
                     }
                 )
                 .presentationDetents([.height(500), .large])
                 .presentationDragIndicator(.hidden)  // We have our own drag handle
-                .presentationBackgroundInteraction(.enabled)
-                .presentationBackground(.thinMaterial)
             }
             .sheet(isPresented: $showingResults) {
                 ResultsView(
@@ -171,10 +169,10 @@ struct ScannerHomeView: View {
                     contributionMessage: contributionMessage
                 )
             }
-            .onChange(of: capturedImage) { _, newImage in
-                if let image = newImage {
+            .onChange(of: capturedImages) { newImages in
+                if !newImages.isEmpty {
                     // Start analysis immediately in background
-                    startBackgroundAnalysis(image)
+                    startBackgroundAnalysis(newImages)
 
                     if FeatureFlags.exploreEnabled {
                         // Show restaurant search while analysis runs in background
@@ -200,11 +198,11 @@ struct ScannerHomeView: View {
         }
     }
     
-    // Start analysis in background immediately when photo is taken
-    private func startBackgroundAnalysis(_ image: UIImage) {
+    // Start analysis in background immediately when photos are taken
+    private func startBackgroundAnalysis(_ images: [UIImage]) {
         backgroundAnalysisTask = Task {
             return try await APIService.shared.analyzeMenu(
-                image: image,
+                images: images,
                 protocols: userProfile.selectedProtocols
             )
         }
@@ -225,14 +223,14 @@ struct ScannerHomeView: View {
                 await MainActor.run {
                     analysisResults = results
                     isAnalyzing = false
-                    capturedImage = nil
+                    capturedImages = []
                     backgroundAnalysisTask = nil
                     showingResults = true
                 }
             } catch {
                 await MainActor.run {
                     isAnalyzing = false
-                    capturedImage = nil
+                    capturedImages = []
                     backgroundAnalysisTask = nil
                     errorMessage = error.localizedDescription
                 }
@@ -241,12 +239,12 @@ struct ScannerHomeView: View {
     }
 
     // Anonymous scan (no restaurant linking) - now uses background task
-    private func analyzeAnonymously(_ image: UIImage) {
+    private func analyzeAnonymously(_ images: [UIImage]) {
         showAnalysisInProgress()
     }
 
     // Community contribution (linked to restaurant)
-    private func analyzeWithRestaurant(_ image: UIImage, placeId: String, name: String) {
+    private func analyzeWithRestaurant(_ images: [UIImage], placeId: String, name: String) {
         // Cancel background task if running (we need to use restaurant endpoint)
         backgroundAnalysisTask?.cancel()
         backgroundAnalysisTask = nil
@@ -258,22 +256,22 @@ struct ScannerHomeView: View {
             do {
                 let response = try await APIService.shared.analyzeRestaurantMenu(
                     placeId: placeId,
-                    image: image,
+                    images: images,
                     protocols: userProfile.selectedProtocols
                 )
 
                 await MainActor.run {
                     analysisResults = response.menuItems
-                    contributionMessage = "✅ Analysis saved! Other users can now see \(name) has menu data."
+                    contributionMessage = "Analysis saved! Other users can now see \(name) has menu data."
                     isAnalyzing = false
-                    capturedImage = nil
+                    capturedImages = []
                     selectedRestaurant = nil
                     showingResults = true
                 }
             } catch {
                 await MainActor.run {
                     isAnalyzing = false
-                    capturedImage = nil
+                    capturedImages = []
                     selectedRestaurant = nil
                     errorMessage = error.localizedDescription
                 }
@@ -422,8 +420,10 @@ struct ProfileTabView: View {
                     NavigationLink(destination: ScanHistoryView()) {
                         Label("Scan History", systemImage: "clock.arrow.circlepath")
                     }
-                    NavigationLink(destination: BookmarksView()) {
-                        Label("Bookmarks", systemImage: "bookmark.fill")
+                    if FeatureFlags.bookmarksEnabled {
+                        NavigationLink(destination: BookmarksView()) {
+                            Label("Bookmarks", systemImage: "bookmark.fill")
+                        }
                     }
                 }
 
