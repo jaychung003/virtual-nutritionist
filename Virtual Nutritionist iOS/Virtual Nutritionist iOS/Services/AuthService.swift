@@ -33,7 +33,7 @@ enum AuthError: LocalizedError {
 class AuthService {
     static let shared = AuthService()
 
-    private let baseURL = "http://52.12.190.32"
+    private let baseURL = "http://54.167.6.204"
     private let keychain = KeychainService.shared
 
     private init() {}
