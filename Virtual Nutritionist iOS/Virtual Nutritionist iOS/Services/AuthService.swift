@@ -126,6 +126,16 @@ class AuthService {
         return true
     }
 
+    func deleteAccount() async throws {
+        let endpoint = "\(baseURL)/profile"
+
+        // Call delete endpoint with authentication
+        try await performRequest(url: endpoint, method: "DELETE", requiresAuth: true)
+
+        // Clear tokens from keychain after successful deletion
+        try keychain.clearAllTokens()
+    }
+
     // MARK: - Private Helpers
 
     private func performRequest(url: String, method: String, body: [String: Any]? = nil, requiresAuth: Bool = false) async throws -> Data {

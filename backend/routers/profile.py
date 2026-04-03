@@ -115,3 +115,40 @@ async def update_preferences(
         selected_protocols=preferences.selected_protocols,
         updated_at=preferences.updated_at.isoformat()
     )
+
+
+@router.delete("")
+async def delete_account(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Permanently delete user account and all associated data.
+
+    This action:
+    - Deletes the user account
+    - Deletes all scan history
+    - Deletes all bookmarks
+    - Deletes all dietary preferences
+    - Revokes all refresh tokens
+
+    This action is immediate and cannot be undone.
+
+    Requires authentication.
+    """
+    try:
+        # Delete the user - cascading deletes will remove all related data
+        # (preferences, scan_history, bookmarks, refresh_tokens)
+        db.delete(current_user)
+        db.commit()
+
+        return {
+            "message": "Account successfully deleted",
+            "deleted": True
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete account: {str(e)}"
+        )
