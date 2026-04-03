@@ -380,6 +380,10 @@ struct ProfileTabView: View {
     @EnvironmentObject var userProfile: UserProfile
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var showingProfile = false
+    @State private var showDeleteConfirmation = false
+    @State private var showDeleteError = false
+    @State private var deleteErrorMessage = ""
+    @State private var isDeleting = false
 
     var body: some View {
         NavigationView {
@@ -443,11 +447,60 @@ struct ProfileTabView: View {
                             Text("Log Out")
                         }
                     }
+
+                    Button(role: .destructive, action: {
+                        showDeleteConfirmation = true
+                    }) {
+                        if isDeleting {
+                            HStack {
+                                ProgressView()
+                                Text("Deleting...")
+                            }
+                        } else {
+                            Label("Delete Account", systemImage: "trash.fill")
+                        }
+                    }
+                    .disabled(isDeleting)
                 }
             }
             .navigationTitle("Profile")
             .sheet(isPresented: $showingProfile) {
                 ProfileView()
+            }
+            .alert("Delete Account", isPresented: $showDeleteConfirmation) {
+                Button("Cancel", role: .cancel) { }
+                Button("Delete", role: .destructive) {
+                    Task {
+                        await deleteAccount()
+                    }
+                }
+            } message: {
+                Text("Are you sure you want to permanently delete your account? This will delete all your scan history, bookmarks, and preferences. This action cannot be undone.")
+            }
+            .alert("Error", isPresented: $showDeleteError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(deleteErrorMessage)
+            }
+        }
+    }
+
+    private func deleteAccount() async {
+        isDeleting = true
+
+        do {
+            try await AuthService.shared.deleteAccount()
+            // Account deleted successfully - the AuthViewModel will handle logout
+            await MainActor.run {
+                isDeleting = false
+                authViewModel.isAuthenticated = false
+                authViewModel.currentUser = nil
+            }
+        } catch {
+            await MainActor.run {
+                isDeleting = false
+                deleteErrorMessage = error.localizedDescription
+                showDeleteError = true
             }
         }
     }

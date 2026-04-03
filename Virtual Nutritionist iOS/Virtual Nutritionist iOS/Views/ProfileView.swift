@@ -4,12 +4,6 @@ import SwiftUI
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var userProfile: UserProfile
-    @EnvironmentObject var authViewModel: AuthViewModel
-
-    @State private var showDeleteConfirmation = false
-    @State private var showDeleteError = false
-    @State private var deleteErrorMessage = ""
-    @State private var isDeleting = false
 
     var body: some View {
         NavigationStack {
@@ -52,37 +46,7 @@ struct ProfileView: View {
                     // Info section
                     InfoBox()
                         .padding(.horizontal)
-
-                    // Account Management Section
-                    VStack(spacing: 16) {
-                        Divider()
-                            .padding(.vertical, 8)
-
-                        // Delete Account Button
-                        Button(action: {
-                            showDeleteConfirmation = true
-                        }) {
-                            HStack {
-                                Image(systemName: "trash.fill")
-                                Text("Delete Account")
-                                    .fontWeight(.semibold)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.red.opacity(0.1))
-                            .foregroundStyle(.red)
-                            .cornerRadius(12)
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(isDeleting)
-
-                        Text("Permanently delete your account and all associated data. This action cannot be undone.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding(.horizontal)
-                    .padding(.bottom, 32)
+                        .padding(.bottom, 32)
                 }
             }
             .navigationTitle("Settings")
@@ -94,62 +58,6 @@ struct ProfileView: View {
                     }
                     .fontWeight(.semibold)
                 }
-            }
-            .alert("Delete Account", isPresented: $showDeleteConfirmation) {
-                Button("Cancel", role: .cancel) { }
-                Button("Delete", role: .destructive) {
-                    Task {
-                        await deleteAccount()
-                    }
-                }
-            } message: {
-                Text("Are you sure you want to permanently delete your account? This will delete all your scan history, bookmarks, and preferences. This action cannot be undone.")
-            }
-            .alert("Error", isPresented: $showDeleteError) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text(deleteErrorMessage)
-            }
-            .overlay {
-                if isDeleting {
-                    ZStack {
-                        Color.black.opacity(0.3)
-                            .ignoresSafeArea()
-
-                        VStack(spacing: 16) {
-                            ProgressView()
-                                .scaleEffect(1.5)
-                            Text("Deleting account...")
-                                .font(.headline)
-                                .foregroundStyle(.white)
-                        }
-                        .padding(32)
-                        .background(Color(.systemBackground))
-                        .cornerRadius(16)
-                        .shadow(radius: 10)
-                    }
-                }
-            }
-        }
-    }
-
-    private func deleteAccount() async {
-        isDeleting = true
-
-        do {
-            try await AuthService.shared.deleteAccount()
-            // Account deleted successfully - the AuthViewModel will handle logout
-            await MainActor.run {
-                isDeleting = false
-                authViewModel.isAuthenticated = false
-                authViewModel.currentUser = nil
-                dismiss()
-            }
-        } catch {
-            await MainActor.run {
-                isDeleting = false
-                deleteErrorMessage = error.localizedDescription
-                showDeleteError = true
             }
         }
     }
@@ -263,5 +171,4 @@ struct InfoRow: View {
 #Preview {
     ProfileView()
         .environmentObject(UserProfile())
-        .environmentObject(AuthViewModel())
 }
