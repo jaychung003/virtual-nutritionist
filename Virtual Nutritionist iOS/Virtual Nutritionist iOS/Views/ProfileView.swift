@@ -4,7 +4,7 @@ import SwiftUI
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var userProfile: UserProfile
-    
+
     var body: some View {
         NavigationStack {
             ScrollView {

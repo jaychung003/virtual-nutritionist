@@ -14,7 +14,9 @@ struct FeatureFlags {
     /// Enable smart restaurant suggestions with bottom sheet UI
     static let smartRestaurantSuggestions = true
 
+    /// Enable bookmark/save functionality for menu items
+    static let bookmarksEnabled = false
+
     // Add more feature flags here as needed
-    // static let bookmarksEnabled = false
     // static let scanHistoryEnabled = false
 }

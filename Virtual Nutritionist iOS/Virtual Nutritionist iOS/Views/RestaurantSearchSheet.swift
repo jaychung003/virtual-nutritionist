@@ -17,7 +17,6 @@ struct RestaurantSearchSheet: View {
     @StateObject private var viewModel = RestaurantSearchViewModel()
     @Environment(\.dismiss) private var dismiss
     @State private var showSkipConfirmation = false
-    @State private var showSearch = false
 
     var body: some View {
         Group {
@@ -55,8 +54,8 @@ struct RestaurantSearchSheet: View {
                         suggestionsSection
                     }
 
-                    // Expandable search
-                    expandableSearchSection
+                    // Search bar (always visible)
+                    searchSection
 
                     // Skip link (low prominence)
                     Button(action: {
@@ -80,7 +79,7 @@ struct RestaurantSearchSheet: View {
                 dismiss()
             }
         } message: {
-            Text("You won't see if this restaurant has analyzed menu items for your diet.")
+            Text("Selecting the restaurant will help other users with dietary restrictions!")
         }
     }
 
@@ -207,78 +206,54 @@ struct RestaurantSearchSheet: View {
         }
     }
 
-    // MARK: - Expandable Search Section
+    // MARK: - Search Section
 
-    private var expandableSearchSection: some View {
+    private var searchSection: some View {
         VStack(spacing: 12) {
-            Button(action: {
-                withAnimation {
-                    showSearch.toggle()
-                }
-            }) {
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                    Text("Search for restaurant")
-                        .font(.subheadline)
-                    Spacer()
-                    Image(systemName: showSearch ? "chevron.up" : "chevron.down")
-                }
-                .foregroundColor(.secondary)
-                .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(10)
-            }
-            .padding(.horizontal)
+            SearchBar(text: $viewModel.searchQuery)
+                .padding(.horizontal)
 
-            if showSearch {
+            // Search results
+            if viewModel.isLoading {
+                ProgressView("Searching...")
+                    .padding()
+            } else if let error = viewModel.errorMessage {
                 VStack(spacing: 12) {
-                    SearchBar(text: $viewModel.searchQuery)
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.title)
+                        .foregroundColor(.red)
+                    Text(error)
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                }
+                .padding()
+            } else if viewModel.searchResults.isEmpty && !viewModel.searchQuery.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.title)
+                        .foregroundColor(.gray)
+                    Text("No restaurants found")
+                        .font(.headline)
+                    Text("Try a different search term")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
+                .padding()
+            } else if !viewModel.searchResults.isEmpty {
+                LazyVStack(spacing: 12) {
+                    ForEach(viewModel.searchResults.prefix(10)) { restaurant in
+                        Button(action: {
+                            onSelect(restaurant.placeId, restaurant.name)
+                            dismiss()
+                        }) {
+                            RestaurantSuggestionCard(restaurant: restaurant)
+                        }
+                        .buttonStyle(PlainButtonStyle())
                         .padding(.horizontal)
-
-                    // Search results
-                    if viewModel.isLoading {
-                        ProgressView("Searching...")
-                            .padding()
-                    } else if let error = viewModel.errorMessage {
-                        VStack(spacing: 12) {
-                            Image(systemName: "exclamationmark.triangle")
-                                .font(.title)
-                                .foregroundColor(.red)
-                            Text(error)
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                                .multilineTextAlignment(.center)
-                        }
-                        .padding()
-                    } else if viewModel.searchResults.isEmpty && !viewModel.searchQuery.isEmpty {
-                        VStack(spacing: 12) {
-                            Image(systemName: "magnifyingglass")
-                                .font(.title)
-                                .foregroundColor(.gray)
-                            Text("No restaurants found")
-                                .font(.headline)
-                            Text("Try a different search term")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                        }
-                        .padding()
-                    } else if !viewModel.searchResults.isEmpty {
-                        LazyVStack(spacing: 12) {
-                            ForEach(viewModel.searchResults.prefix(10)) { restaurant in
-                                Button(action: {
-                                    onSelect(restaurant.placeId, restaurant.name)
-                                    dismiss()
-                                }) {
-                                    RestaurantSuggestionCard(restaurant: restaurant)
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                                .padding(.horizontal)
-                            }
-                        }
-                        .frame(maxHeight: 400)
                     }
                 }
-                .transition(.opacity)
+                .frame(maxHeight: 400)
             }
         }
     }
@@ -527,12 +502,12 @@ class RestaurantSearchViewModel: NSObject, ObservableObject {
         errorMessage = nil
 
         do {
-            // Use optimized nearby search (500m radius, limit 10)
+            // Use optimized nearby search (500m radius, limit 5)
             let nearby = try await apiService.getNearbyRestaurants(
                 latitude: location.latitude,
                 longitude: location.longitude,
                 radiusMeters: 500,
-                limit: 10
+                limit: 5
             )
 
             // Rank suggestions

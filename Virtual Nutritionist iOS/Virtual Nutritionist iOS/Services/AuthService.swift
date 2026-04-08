@@ -33,7 +33,7 @@ enum AuthError: LocalizedError {
 class AuthService {
     static let shared = AuthService()
 
-    private let baseURL = "http://52.12.190.32"
+    private let baseURL = "http://54.167.6.204"
     private let keychain = KeychainService.shared
 
     private init() {}
@@ -126,6 +126,24 @@ class AuthService {
         return true
     }
 
+    func deleteAccount() async throws {
+        // Try to refresh token first to ensure we have a valid token
+        do {
+            try await refreshToken()
+        } catch {
+            // If refresh fails, try with existing token anyway
+            // (user might still be logged in with a valid token)
+        }
+
+        let endpoint = "\(baseURL)/profile"
+
+        // Call delete endpoint with authentication
+        _ = try await performRequest(url: endpoint, method: "DELETE", requiresAuth: true)
+
+        // Clear tokens from keychain after successful deletion
+        try keychain.clearAllTokens()
+    }
+
     // MARK: - Private Helpers
 
     private func performRequest(url: String, method: String, body: [String: Any]? = nil, requiresAuth: Bool = false) async throws -> Data {
@@ -163,7 +181,13 @@ class AuthService {
             case 200...299:
                 return data
             case 401:
-                throw AuthError.unauthorized
+                // For authenticated requests, throw unauthorized
+                // For login/register, parse the error message from backend
+                if requiresAuth {
+                    throw AuthError.unauthorized
+                }
+                // Fall through to parse backend error message
+                fallthrough
             case 400...499:
                 // Try to parse error message from response
                 if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
