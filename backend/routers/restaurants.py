@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from db.session import get_db
 from db.models import Restaurant, RestaurantMenuItem
@@ -19,6 +19,29 @@ from services.vision_service import analyze_menu_images
 from services.inference_service import load_protocol_triggers
 
 router = APIRouter(prefix="/restaurants", tags=["Restaurants"])
+
+# The shipped iOS build decodes `last_analyzed` into a Swift `Date` using a bare
+# JSONDecoder -- the .deferredToDate strategy, which expects a NUMBER of seconds
+# since Apple's reference date (2001-01-01 UTC), not an ISO-8601 string. Emitting a
+# string (FastAPI's default for datetime) makes the client throw a decoding error,
+# which surfaces in the app as "Search failed: failed to parse server response".
+#
+# MenuMetadata.lastAnalyzed on the client is NON-optional, so null does not work
+# there either; a number is the only shape every affected screen can decode.
+#
+# Do not change this back to a datetime without shipping a client that sets an
+# explicit dateDecodingStrategy -- App Store builds already in users' hands cannot
+# be updated in place, and they will break again.
+APPLE_REFERENCE_DATE = datetime(2001, 1, 1, tzinfo=timezone.utc)
+
+
+def to_apple_epoch(dt: Optional[datetime]) -> Optional[float]:
+    """Convert a datetime to seconds since Apple's reference date, for Swift's Date."""
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return (dt - APPLE_REFERENCE_DATE).total_seconds()
 
 
 # Request/Response Models
@@ -50,7 +73,7 @@ class RestaurantNearbyResult(BaseModel):
     is_open: Optional[bool]
     has_menu_data: bool
     safe_items_count: Optional[int] = 0
-    last_analyzed: Optional[datetime]
+    last_analyzed: Optional[float]  # Apple reference-date seconds; see to_apple_epoch
 
 
 class RestaurantDetailResponse(BaseModel):
@@ -68,7 +91,7 @@ class RestaurantDetailResponse(BaseModel):
     photos: List[dict]
     has_menu_data: bool
     menu_item_count: Optional[int]
-    last_analyzed: Optional[datetime]
+    last_analyzed: Optional[float]  # Apple reference-date seconds; see to_apple_epoch
 
 
 @router.get("/search", response_model=List[RestaurantSearchResult])
@@ -173,7 +196,7 @@ async def get_nearby_restaurants(
             # Count safe items for user's protocols
             # TODO: Implement this query when we have menu item analysis
             safe_count = 0
-            last_analyzed = our_rest.menu_last_scanned
+            last_analyzed = to_apple_epoch(our_rest.menu_last_scanned)
 
         results.append({
             "place_id": place_id,
@@ -232,7 +255,7 @@ async def get_restaurant_details(
         menu_item_count = db.query(RestaurantMenuItem).filter(
             RestaurantMenuItem.restaurant_id == our_restaurant.id
         ).count()
-        last_analyzed = our_restaurant.menu_last_scanned
+        last_analyzed = to_apple_epoch(our_restaurant.menu_last_scanned)
 
     return {
         "place_id": details["place_id"],
@@ -345,7 +368,7 @@ async def get_restaurant_menu(
             for item in menu_items
         ],
         "metadata": {
-            "last_analyzed": restaurant.menu_last_scanned,
+            "last_analyzed": to_apple_epoch(restaurant.menu_last_scanned) or 0.0,
             "days_since_scan": days_since_scan,
             "freshness": freshness,
             "total_scans": int(restaurant.total_scans or "1"),
